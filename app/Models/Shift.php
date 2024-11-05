@@ -11,6 +11,6 @@ class Shift extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'shift_id', 'id');
+        return $this->belongsTo(User::class, 'id', 'shift_id');
     }
 }

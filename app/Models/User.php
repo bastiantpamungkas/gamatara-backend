@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'shift_id'
     ];
 
     /**
@@ -50,7 +51,7 @@ class User extends Authenticatable
 
     public function attendance()
     {
-        return $this->belongsTo(Attendance::class, 'user_id', 'id');
+        return $this->belongsTo(Attendance::class, 'id', 'user_id');
     }
 
     public function att_log()
@@ -60,6 +61,6 @@ class User extends Authenticatable
 
     public function shift()
     {
-        return $this->hasMany(Shift::class, 'shift_id', 'id');
+        return $this->hasMany(Shift::class, 'id', 'shift_id');
     }
 }

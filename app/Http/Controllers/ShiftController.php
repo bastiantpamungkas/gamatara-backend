@@ -3,18 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
-use App\Models\User;
+use App\Models\Shift;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class ShiftController extends Controller
 {
     public function list(Request $request)
     {
-        $user = Helper::pagination(User::query(), $request, ['name', 'email']);
+        $shift = Helper::pagination(Shift::query(), $request, [
+            'name',
+            'early_check_in',
+            'check_in',
+            'late_check_in',
+            'early_check_out',
+            'check_out',
+            'late_check_out'
+        ]);
 
         return response()->json([
             'success' => true,
-            'data' => $user
+            'data' => $shift
         ], 200);
     }
 
@@ -22,21 +30,22 @@ class UserController extends Controller
     {
         $valid = Helper::validator($request->all(), [
             'name' => 'required',
-            'email' => 'email|required',
-            'password' => 'required',
-            'shift_id' => 'required'
+            'early_check_in' => 'required',
+            'check_in' => 'required',
+            'late_check_in' => 'required',
+            'early_check_out' => 'required',
+            'check_out' => 'required',
+            'late_check_out' => 'required'
         ]);
 
         if ($valid == true) {
             try {
-                $user = User::create($request->all());
-
-                $user->assignRole('Employee');
+                $shift = Shift::create($request->all());
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Success Added Employee",
-                    'data' => $user
+                    'message' => "Success Added Shift",
+                    'data' => $shift
                 ], 200);
             } catch (\Exception $e) {
                 return response()->json([
@@ -48,24 +57,24 @@ class UserController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => "Failed Added Employee",
+            'message' => "Failed Added Shift",
         ], 422);
     }
 
     public function detail($id)
     {
-        $user = User::find($id);
+        $shift = Shift::find($id);
 
-        if (!$user) {
+        if (!$shift) {
             return response()->json([
                 'success' => false,
-                'message' => "Employee Not Found",
+                'message' => "Shift Not Found",
             ], 404);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $user
+            'data' => $shift
         ], 200);
     }
 
@@ -73,28 +82,31 @@ class UserController extends Controller
     {
         $valid = Helper::validator($request->all(), [
             'name' => 'required',
-            'email' => 'email|required',
-            'password' => 'required',
-            'shift_id' => 'required'
+            'early_check_in' => 'required',
+            'check_in' => 'required',
+            'late_check_in' => 'required',
+            'early_check_out' => 'required',
+            'check_out' => 'required',
+            'late_check_out' => 'required'
         ]);
 
         if ($valid == true) {
             try {
-                $user = User::find($id);
+                $shift = Shift::find($id);
 
-                if (!$user) {
+                if (!$shift) {
                     return response()->json([
                         'success' => true,
-                        'message' => "Employee Not Found",
+                        'message' => "Shift Not Found",
                     ], 200);
                 }
 
-                $user->update($request->all());
+                $shift->update($request->all());
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Success Updated Employee",
-                    'data' => $user
+                    'message' => "Success Updated Shift",
+                    'data' => $shift
                 ], 200);
             } catch (\Exception $e) {
                 return response()->json([
@@ -106,28 +118,28 @@ class UserController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => "Failed Updated Employee",
+            'message' => "Failed Updated Shift",
         ], 422);
     }
 
     public function delete($id)
     {
         try {
-            $user = User::find($id);
+            $shift = Shift::find($id);
 
-            if (!$user) {
+            if (!$shift) {
                 return response()->json([
                     'success' => true,
-                    'message' => "Employee Not Found",
+                    'message' => "Shift Not Found",
                 ], 200);
             }
 
-            $user->delete();
+            $shift->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => "Success Deleted Employee",
-                'data' => $user
+                'message' => "Success Deleted Shift",
+                'data' => $shift
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
