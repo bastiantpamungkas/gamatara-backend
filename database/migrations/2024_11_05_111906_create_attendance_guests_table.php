@@ -16,9 +16,8 @@ return new class extends Migration
             $table->bigInteger('guest_id');
             $table->date('date');
             $table->time('time_check_in');
-            $table->time('time_check_out');
+            $table->time('time_check_out')->nullable();
             $table->text('need');
-            $table->integer('status');
             $table->timestamps();
         });
     }

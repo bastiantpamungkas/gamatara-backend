@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Helper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -19,19 +19,18 @@ class AuthController extends Controller
         ]);
 
         if ($valid == true) {
-            if (Auth::attempt($credentials)) {
+            if ($token = Auth::attempt($credentials)) {
 
                 if (Auth::user()->hasRole(['Admin', 'Security'])) {
                     $user = Auth::user();
                     $user->getRoleNames();
                     $user->getAllPermissions();
 
-                    $token = $user->createToken('API Token')->plainTextToken;
-
                     return response()->json([
                         'success' => true,
                         'message' => "Login Success",
                         'token' => $token,
+                        'token_type' => 'bearer',
                         'user' => $user
                     ]);
                 } else {
@@ -63,20 +62,18 @@ class AuthController extends Controller
 
     public function logout()
     {
-        $token = Auth::user()->currentAccessToken();
-
-        if ($token) {
-            $token->delete();
-
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+    
             return response()->json([
                 'success' => true,
                 'message' => 'Logout Success'
             ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'succes' => false,
+                'message' => $e->getMessage()
+            ], 422);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Token Not Found'
-        ], 422);
     }
 }

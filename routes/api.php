@@ -1,6 +1,8 @@
 <?php
 
+use App\Events\AttendanceRealtimeEvent;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttendanceGuestController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FaceScanController;
 use App\Http\Controllers\ShiftController;
@@ -17,7 +19,7 @@ Route::post('/', [FaceScanController::class, 'facescan']);
 
 Route::post('login', [AuthController::class, 'login']); 
 
-Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:api'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
 
@@ -50,7 +52,30 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('list_per_employee/{user_id}', [AttendanceController::class, 'list_per_employee']);
         Route::get('detail/{id}', [AttendanceController::class, 'detail']);
     });
-
+    
+    Route::prefix('attendance_guest')->group(function () {
+        Route::get('list', [AttendanceGuestController::class, 'list']);
+        Route::get('list_per_guest/{guest_id}', [AttendanceGuestController::class, 'list_per_guest']);
+        Route::post('store', [AttendanceGuestController::class, 'store']);
+        Route::post('store', [AttendanceGuestController::class, 'store']);
+        Route::put('update/{id}', [AttendanceGuestController::class, 'update']);
+    });
 
     // Router lainnya
 });
+
+// Abli 
+Route::get('/attendance_realtime', function (Request $request) {
+    $channelName = 'attendance-gamatara-channel';
+    $attendanceController = new AttendanceController();
+    $data = $attendanceController->list($request)->getData();
+
+    broadcast(new AttendanceRealtimeEvent( $channelName, $data ));
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Data berhasil dibroadcast',
+        'data' => $data
+    ]);
+
+})->middleware('throttle:60,1');
