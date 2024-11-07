@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FaceScanController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\GuestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('detail/{id}', [ShiftController::class, 'detail']);
         Route::put('update/{id}', [ShiftController::class, 'update']);
         Route::delete('delete/{id}', [ShiftController::class, 'delete']);
+    });
+    
+    Route::prefix('guest')->group(function () {
+        Route::get('list', [GuestController::class, 'list']);
+        Route::post('store', [GuestController::class, 'store']);
+        Route::get('detail/{id}', [GuestController::class, 'detail']);
+        Route::put('update/{id}', [GuestController::class, 'update']);
+        Route::delete('delete/{id}', [GuestController::class, 'delete']);
     });
 
     Route::prefix('attendance')->group(function () {

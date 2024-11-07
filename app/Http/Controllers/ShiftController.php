@@ -96,9 +96,9 @@ class ShiftController extends Controller
 
                 if (!$shift) {
                     return response()->json([
-                        'success' => true,
+                        'success' => false,
                         'message' => "Shift Not Found",
-                    ], 200);
+                    ], 404);
                 }
 
                 $shift->update($request->all());
@@ -139,7 +139,6 @@ class ShiftController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => "Success Deleted Shift",
-                'data' => $shift
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
