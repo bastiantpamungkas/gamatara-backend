@@ -34,12 +34,12 @@ class GuestController extends Controller
                     'success' => true,
                     'message' => "Success Added Guest",
                     'data' => $guest
-                ], 422);
+                ], 200);
             }catch (\Exception $e){
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage()
-                ], 200);
+                ], 422);
             }
         }
 
