@@ -8,8 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, HasRoles;
@@ -23,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'shift_id'
     ];
 
     /**
@@ -48,9 +50,30 @@ class User extends Authenticatable
         ];
     }
 
+    
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
     public function attendance()
     {
-        return $this->belongsTo(Attendance::class, 'user_id', 'id');
+        return $this->belongsTo(Attendance::class, 'id', 'user_id');
     }
 
     public function att_log()
@@ -60,6 +83,6 @@ class User extends Authenticatable
 
     public function shift()
     {
-        return $this->hasMany(Shift::class, 'shift_id', 'id');
+        return $this->hasMany(Shift::class, 'id', 'shift_id');
     }
 }
