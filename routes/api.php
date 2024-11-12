@@ -4,6 +4,7 @@ use App\Events\AttendanceRealtimeEvent;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceGuestController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaceScanController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
@@ -22,6 +23,13 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware(['auth:api'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
+
+    Route::prefix('dashboard')->group(function () {
+        Route::get('counts', [DashboardController::class, 'counts']);
+        Route::get('charts_employee', [DashboardController::class, 'charts_employee']);
+        Route::get('charts_late_and_not_present', [DashboardController::class, 'charts_late_and_not_present']);
+        Route::get('charts_guest', [DashboardController::class, 'charts_guest']);
+    });
 
     Route::prefix('karyawan')->group(function () {
         Route::get('list', [UserController::class, 'list']);

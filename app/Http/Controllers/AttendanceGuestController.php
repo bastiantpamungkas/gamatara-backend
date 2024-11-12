@@ -8,6 +8,7 @@ use App\Helpers\Helper;
 use App\Models\Guest;
 use App\Models\AttendanceGuest;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class AttendanceGuestController extends Controller
 {
@@ -78,7 +79,7 @@ class AttendanceGuestController extends Controller
                     'message' => 'Success Added Guest And Attendance',
                     'data' => [
                         'guest' => $guest,
-                        'attendacew' => $att_guest
+                        'attendace' => $att_guest
                     ]
                 ], 200);
     
