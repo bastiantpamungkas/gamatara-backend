@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('attendance_guests', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('guest_id');
+            $table->string('institution')->nullable();
             $table->date('date');
             $table->time('time_check_in');
             $table->time('time_check_out')->nullable();

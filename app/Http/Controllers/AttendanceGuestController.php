@@ -50,6 +50,7 @@ class AttendanceGuestController extends Controller
                 $guest = Guest::create([
                     'nik' => $request->nik,
                     'name' => $request->name,
+                    'institution' => $request->institution,
                     'phone_number' => $request->phone_number,
                 ]);
 
@@ -69,6 +70,7 @@ class AttendanceGuestController extends Controller
             try{
                 $att_guest = AttendanceGuest::create([
                     'guest_id' => $guest->id,
+                    'institution' => $request->institution,
                     'date' => Carbon::now()->format('Y-m-d'),
                     'time_check_in' => Carbon::now()->format('H:i:s'),
                     'need' => $request->need 
