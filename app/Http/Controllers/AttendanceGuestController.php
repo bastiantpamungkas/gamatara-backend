@@ -135,4 +135,37 @@ class AttendanceGuestController extends Controller
         ], 422);
        
     }
+
+    public function report(Request $request){
+        $pageSize = $request->input('page_size', 10);
+        $page = $request->input('page', 1);
+        $keyword = strtolower($request->input('keyword', ''));
+
+        $guest = Guest::select('id', 'name', 'phone_number')
+            ->withCount([
+                'attendance_guest',
+            ])
+            ->when($keyword, function ($q) use ($keyword) {
+                $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . $keyword . '%'])
+                ->orWhereRaw("LOWER(CAST(phone_number AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+            })
+            ->paginate($pageSize, ['*'], 'page', $page);
+
+        $guest->getCollection()->transform(function($q) {
+            $lastAttendance = $q->attendance_guest()->latest()->first();
+
+            if ($lastAttendance) {
+                $q->last_visit = $lastAttendance->created_at->format('Y-m-d H:i:s');
+            } else {
+                $q->last_visit = null;
+            }
+
+            return $q;
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $guest
+        ], 200);
+    }
 }

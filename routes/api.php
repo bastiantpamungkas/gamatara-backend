@@ -59,6 +59,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('list', [AttendanceController::class, 'list']);
         Route::get('list_per_employee/{user_id}', [AttendanceController::class, 'list_per_employee']);
         Route::get('detail/{id}', [AttendanceController::class, 'detail']);
+        Route::get('report', [AttendanceController::class, 'report']);
     });
     
     Route::prefix('attendance_guest')->group(function () {
@@ -67,6 +68,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('store', [AttendanceGuestController::class, 'store']);
         Route::post('store', [AttendanceGuestController::class, 'store']);
         Route::put('update/{id}', [AttendanceGuestController::class, 'update']);
+        Route::get('report', [AttendanceGuestController::class, 'report']);
     });
 
     // Router lainnya
