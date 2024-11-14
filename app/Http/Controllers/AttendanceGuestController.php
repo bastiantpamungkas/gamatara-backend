@@ -113,6 +113,12 @@ class AttendanceGuestController extends Controller
                 'time_check_out' => Carbon::now()->format('H:i:s')
             ]);
 
+            return response()->json([
+                'success' => true,
+                'message' => 'Success Update Attendance',
+                'data' => $att_guest
+            ], 200);
+
         }catch (\Exception $e){
             return response()->json([
                 'success' => false,
