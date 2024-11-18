@@ -37,11 +37,11 @@ Response
 ```
 {
     "filter": {
-        "type_employee": "1",
+        "type_employee": null,
         "date_start": "2024-11-12",
         "date_end": "2024-11-18"
     },
-    "var": [
+    "days": [
         "Selasa",
         "Rabu",
         "Kamis",
@@ -50,14 +50,46 @@ Response
         "Minggu",
         "Senin"
     ],
-    "val": [
-        3,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0
+    "data": [
+        {
+            "type_employee_id": 2,
+            "type_employee_name": "Karyawan Out Sourcing",
+            "attendance": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "type_employee_id": 3,
+            "type_employee_name": "Karyawan Sub Count",
+            "attendance": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "type_employee_id": 1,
+            "type_employee_name": "Karyawan Tetap",
+            "attendance": [
+                3,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        }
     ]
 }
 ```

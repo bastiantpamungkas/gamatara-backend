@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\TypeEmployee;
 use App\Models\AttendanceGuest;
 use App\Models\Guest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
 
 class DashboardController extends Controller
 {
@@ -59,46 +58,65 @@ class DashboardController extends Controller
         ], 200);
     }
 
-    public function charts_employee(Request $request){
+    public function charts_employee(Request $request) {
         $date_start = $request->input('date_start') ? Carbon::parse($request->input('date_start'))->format('Y-m-d') : Carbon::now()->subDays(6)->format('Y-m-d');
         $date_end = $request->input('date_end') ? Carbon::parse($request->input('date_end'))->format('Y-m-d') : Carbon::now()->format('Y-m-d');
         $type_employee = $request->input('type_employee') ?? null;
-
+    
         Carbon::setLocale('id');
-
+    
+        // Generate all days in the range
         $get_all_days = [];
         foreach (Carbon::parse($date_start)->toPeriod(Carbon::parse($date_end), '1 day') as $date) {
             $get_all_days[] = $date->translatedFormat('l');
         }
-
-        $val = [];
-
-        $current_date = Carbon::parse($date_start);
-        $end_date = Carbon::parse($date_end);
-        
-        while ($current_date <= $end_date) {        
-            $attendance = Attendance::with('user')->whereHas('user', function($q) use ($type_employee){
-                if ($type_employee) {
-                    $q->where('type_employee_id', $type_employee);
-                }
-            })->whereDate('time_check_in', $current_date->format('Y-m-d'))->whereNotNull('time_check_out')->count();
-        
-            $val[] = $attendance ?? 0;
-        
-            $current_date->addDay();
+    
+        // Fetch all employee types
+        $type_employees = \App\Models\TypeEmployee::all();
+        $data = [];
+    
+        foreach ($type_employees as $type) {
+            // Check if type_employee is specified
+            if ($type_employee && $type->id != $type_employee) {
+                continue;
+            }
+    
+            $current_date = Carbon::parse($date_start);
+            $end_date = Carbon::parse($date_end);
+            $attendance_counts = [];
+    
+            // Loop through each day in the range
+            while ($current_date <= $end_date) {
+                $attendance_count = Attendance::with('user')
+                    ->whereHas('user', function ($query) use ($type) {
+                        $query->where('type_employee_id', $type->id);
+                    })
+                    ->whereDate('time_check_in', $current_date->format('Y-m-d'))
+                    ->whereNotNull('time_check_out')
+                    ->count();
+    
+                $attendance_counts[] = $attendance_count; // Add count for this day
+                $current_date->addDay();
+            }
+    
+            // Add data for this type
+            $data[] = [
+                'type_employee_id' => $type->id,
+                'type_employee_name' => $type->name,
+                'attendance' => $attendance_counts,
+            ];
         }
-        
+    
         return response()->json([
             'filter' => [
                 'type_employee' => $type_employee,
                 'date_start' => $date_start,
                 'date_end' => $date_end,
             ],
-            'var' => $get_all_days,
-            'val' => $val
+            'days' => $get_all_days,
+            'data' => $data, // Contains categorized attendance data
         ], 200);
-        
-    }
+    }    
 
     public function charts_late_and_not_present(Request $request){
         $year = $request->input('year') ?? Carbon::now()->year;
