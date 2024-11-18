@@ -75,6 +75,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsTo(Attendance::class, 'id', 'user_id');
     }
+    
+    public function type()
+    {
+        return $this->belongsTo(TypeEmployee::class, 'id', 'type_employee_id');
+    }
 
     public function att_log()
     {

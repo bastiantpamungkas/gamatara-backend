@@ -16,6 +16,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::post('/post_att', [AttendanceController::class, 'post_att']);
+
 Route::post('/', [FaceScanController::class, 'facescan']);
 
 Route::post('login', [AuthController::class, 'login']); 

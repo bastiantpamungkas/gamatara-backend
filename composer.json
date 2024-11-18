@@ -13,6 +13,7 @@
         "ably/laravel-broadcaster": "^1.0",
         "laravel/framework": "^11.9",
         "laravel/sanctum": "^4.0",
+        "laravel/telescope": "^5.2",
         "laravel/tinker": "^2.9",
         "spatie/laravel-permission": "^6.9",
         "tymon/jwt-auth": "^2.1"

@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attendance_guests', function (Blueprint $table) {
+        Schema::create('type_employees', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('guest_id');
-            $table->string('institution')->nullable();
-            $table->datetime('time_check_in');
-            $table->datetime('time_check_out')->nullable();
-            $table->text('need');
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -27,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendance_guests');
+        Schema::dropIfExists('type_employees');
     }
 };

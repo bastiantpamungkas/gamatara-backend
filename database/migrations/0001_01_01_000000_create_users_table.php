@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('pin')->nullable();
             $table->bigInteger('shift_id');
+            $table->bigInteger('type_employee_id');
             $table->rememberToken();
             $table->timestamps();
         });

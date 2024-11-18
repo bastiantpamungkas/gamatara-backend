@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
@@ -87,5 +88,16 @@ class AttendanceController extends Controller
             'success' => true,
             'data' => $user
         ], 200);
+    }
+
+    public function post_att(Request $request){
+
+        Log::info([
+            'data' => $request->all()
+        ]);
+
+        return response()->json([
+            'data' => $request->all()
+        ]);
     }
 }
