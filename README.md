@@ -114,6 +114,20 @@ Params
 }
 ```
 
+Desciption
+```
+status_checkin [
+    1 => 'early_check_in'
+    2 => 'on_time'
+    3 => 'late_check-in
+],
+status_checkout [
+    1 => 'early_check_out'
+    2 => 'on_time'
+    3 => 'late_check_out'
+],
+```
+
 Response
 ```
 {
