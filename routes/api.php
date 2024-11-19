@@ -27,7 +27,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
 
-    Route::get('type-employee', [TypeEmployeeController::class, 'list']);
+    Route::get('type_employee', [TypeEmployeeController::class, 'list']);
 
     Route::prefix('dashboard')->group(function () {
         Route::get('counts', [DashboardController::class, 'counts']);

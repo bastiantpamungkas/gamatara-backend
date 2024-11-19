@@ -214,3 +214,31 @@ Response
     }
 }
 ```
+## TYPE EMPLOYEE
+
+GET
+/type_employee
+
+Response
+```
+[
+    {
+        "id": 3,
+        "name": "Sub-Kon",
+        "created_at": "2024-11-18T01:02:30.000000Z",
+        "updated_at": "2024-11-18T01:02:30.000000Z"
+    },
+    {
+        "id": 2,
+        "name": "Outsourcing",
+        "created_at": "2024-11-18T01:02:30.000000Z",
+        "updated_at": "2024-11-18T01:02:30.000000Z"
+    },
+    {
+        "id": 1,
+        "name": "Tetap",
+        "created_at": "2024-11-18T01:02:30.000000Z",
+        "updated_at": "2024-11-18T01:02:30.000000Z"
+    }
+]
+```
