@@ -13,10 +13,34 @@ class AttendanceController extends Controller
 {
     public function list(Request $request)
     {
-        $att = Helper::pagination(Attendance::with('user'), $request, [
+        $shift = $request->input('shift') ?? null;
+        $status_checkin = $request->input('status_checkin') ?? null;
+        $status_checkout = $request->input('status_checkout') ?? null;
+        $company = $request->input('company') ?? null;
+
+        $att = Attendance::with(['user.shift', 'user.company'])->whereHas('user.shift', function ($q) use ($shift) {
+                if ($shift) {
+                    $q->where('id', $shift);
+                }
+            })->whereHas('user.company', function ($q) use ($company) {
+                if ($company) {
+                    $q->where('id', $company);
+                }
+            });
+
+        if($status_checkin){
+            $att->where('status_check_in', $status_checkin);
+        }
+        
+        if($status_checkout){
+            $att->where('status_check_out', $status_checkout);
+        }
+
+        $att = Helper::pagination($att, $request, [
             'time_check_in',
             'time_check_out',
-            'user.name'
+            'user.name',
+            'user.nip'
         ]);
 
         return response()->json([
