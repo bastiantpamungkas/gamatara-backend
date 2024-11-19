@@ -9,6 +9,7 @@ use App\Http\Controllers\FaceScanController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\TypeEmployeeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
 
+    Route::get('type-employee', [TypeEmployeeController::class, 'list']);
+
     Route::prefix('dashboard')->group(function () {
         Route::get('counts', [DashboardController::class, 'counts']);
         Route::get('charts_employee', [DashboardController::class, 'charts_employee']);
@@ -33,7 +36,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('charts_guest', [DashboardController::class, 'charts_guest']);
     });
 
-    Route::prefix('karyawan')->group(function () {
+    Route::prefix('employee')->group(function () {
         Route::get('list', [UserController::class, 'list']);
         Route::post('store', [UserController::class, 'store']);
         Route::get('detail/{id}', [UserController::class, 'detail']);
