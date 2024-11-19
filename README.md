@@ -21,7 +21,7 @@ Response
 }
 ```
 
-## Dashboard CART_EMPLOYEE
+### Dashboard CART_EMPLOYEE
 
 GET
 /dashboard/charts_employee
@@ -96,7 +96,7 @@ Response
 }
 ```
 
-## Dashboard LIST_ATT_EMPLOYEE
+### Dashboard LIST_ATT_EMPLOYEE
 
 GET
 /dashboard/list
@@ -214,7 +214,7 @@ Response
     }
 }
 ```
-## TYPE EMPLOYEE
+### TYPE EMPLOYEE
 
 GET
 /type_employee
