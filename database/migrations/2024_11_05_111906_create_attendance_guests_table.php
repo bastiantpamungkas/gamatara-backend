@@ -17,7 +17,11 @@ return new class extends Migration
             $table->string('institution')->nullable();
             $table->datetime('time_check_in');
             $table->datetime('time_check_out')->nullable();
+            $table->string('type_vehicle')->nullable();
+            $table->string('no_police')->nullable();
+            $table->bigInteger('total_guest');
             $table->text('need');
+            $table->string('duration')->nullable();
             $table->timestamps();
         });
     }

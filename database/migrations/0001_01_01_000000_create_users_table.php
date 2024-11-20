@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('pin')->nullable();
             $table->bigInteger('shift_id');
             $table->bigInteger('type_employee_id');
+            $table->bigInteger('company_id');
+            $table->integer('status')->default(1);
             $table->rememberToken();
             $table->timestamps();
         });

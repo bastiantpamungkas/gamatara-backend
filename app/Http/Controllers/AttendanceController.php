@@ -13,10 +13,34 @@ class AttendanceController extends Controller
 {
     public function list(Request $request)
     {
-        $att = Helper::pagination(Attendance::with('user'), $request, [
+        $shift = $request->input('shift') ?? null;
+        $status_checkin = $request->input('status_checkin') ?? null;
+        $status_checkout = $request->input('status_checkout') ?? null;
+        $company = $request->input('company') ?? null;
+
+        $att = Attendance::with(['user.shift', 'user.company'])->whereHas('user.shift', function ($q) use ($shift) {
+                if ($shift) {
+                    $q->where('id', $shift);
+                }
+            })->whereHas('user.company', function ($q) use ($company) {
+                if ($company) {
+                    $q->where('id', $company);
+                }
+            });
+
+        if($status_checkin){
+            $att->where('status_check_in', $status_checkin);
+        }
+        
+        if($status_checkout){
+            $att->where('status_check_out', $status_checkout);
+        }
+
+        $att = Helper::pagination($att, $request, [
             'time_check_in',
             'time_check_out',
-            'user.name'
+            'user.name',
+            'user.nip'
         ]);
 
         return response()->json([
@@ -59,30 +83,32 @@ class AttendanceController extends Controller
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
         $keyword = strtolower($request->input('keyword', ''));
+        $status = $request->input('status') ?? null;
+        $most_present = filter_var($request->input('most_present', false), FILTER_VALIDATE_BOOLEAN);
+        $smallest_late = filter_var($request->input('smallest_late', false), FILTER_VALIDATE_BOOLEAN);
+        $most_late = filter_var($request->input('most_late', false), FILTER_VALIDATE_BOOLEAN);
 
-        $user = User::select('id', 'name', 'nip', 'created_at')
-            ->withCount([
-                'attendance',
+        $user = User::select('id', 'name', 'nip', 'status')->withCount(['attendance','attendance as ontime_attendance' => function ($q) {
+                    $q->where('status_check_in', 2);
+                },
                 'attendance as late_attendance' => function ($q) {
                     $q->where('status_check_in', 3);
-                }
-            ])
-            ->when($keyword, function ($q) use ($keyword) {
+                },
+                'attendance as early_checkout' => function ($q) {
+                    $q->where('status_check_out', 1);
+                },
+            ])->when($keyword, function ($q) use ($keyword) {
                 $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . $keyword . '%'])
                 ->orWhereRaw("LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
-            })
-            ->paginate($pageSize, ['*'], 'page', $page);
-
-        $user->getCollection()->transform(function($q) {
-            $createdAt = Carbon::parse($q->created_at);
-            $usrFormated = Carbon::parse($createdAt)->format('Y-m-d');
-            $ranges = range($usrFormated, Carbon::now()->format('Y-m-d'));
-            $range = intval($ranges[0]);
-
-            $q->not_attendance = $range - $q->attendance_count;
-
-            return $q;
-        });
+            })->when($status, function($q) use ($status){
+                $q->where('status', $status);
+            })->when($most_present, function($q){
+                $q->orderBy('attendance_count', 'desc');
+            })->when($smallest_late, function($q){
+                $q->orderBy('late_attendance', 'asc');
+            })->when($most_late, function($q){
+                $q->orderBy('late_attendance', 'desc');
+            })->paginate($pageSize, ['*'], 'page', $page);
 
         return response()->json([
             'success' => true,
