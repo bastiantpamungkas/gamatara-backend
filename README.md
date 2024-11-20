@@ -99,7 +99,7 @@ Response
 ### Dashboard LIST_ATT_EMPLOYEE
 
 GET
-/dashboard/list
+/attendance/list
 
 Params
 ```
@@ -257,7 +257,8 @@ Params
     'status' : 1,
     'most_present' : true,
     'smallest_late' : true,
-    'most_late' : true
+    'most_late' : true,
+    'month' : '2024-11'
 }
 ```
 
@@ -368,7 +369,12 @@ Params
 {
     'page_size' : 10,
     'page' : 1,
-    'keyword' : ''
+    'keyword' : '',
+    'most_present' : true,
+    'smallest_present' : true,
+    'longest_duration' : true,
+    'shortest_duration' : true,
+    'year' : '2024'
 }
 ```
 
