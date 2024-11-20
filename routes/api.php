@@ -9,11 +9,8 @@ use App\Http\Controllers\FaceScanController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GuestController;
-<<<<<<< HEAD
 use App\Http\Controllers\RolePermissionController;
-=======
 use App\Http\Controllers\TypeEmployeeController;
->>>>>>> 551e4e94d0e3fab094cca3009a39488c776f0b63
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
