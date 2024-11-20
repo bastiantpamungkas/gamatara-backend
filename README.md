@@ -4,6 +4,226 @@
 
 ## API SPEK
 
+### LOGIN
+
+POST
+/login
+
+Body
+```
+{
+    'email' : 'admin@gmail.com'
+    'password' : 123456
+}
+```
+
+Response
+```
+{
+    "success": true,
+    "message": "Login Success",
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2xvZ2luIiwiaWF0IjoxNzMyMDg4Nzk3LCJleHAiOjM2MDE3MzIwODg3OTcsIm5iZiI6MTczMjA4ODc5NywianRpIjoiNFlJTk1LQmVKM3UwRXpaZiIsInN1YiI6IjEiLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.pvLQ7TZWFPgHZq-Xd9ekJnweJlji99upXm3kFkgZ-HI",
+    "token_type": "bearer",
+    "user": {
+        "id": 1,
+        "name": "Admin",
+        "email": "admin@gmail.com",
+        "email_verified_at": null,
+        "pin": "123456",
+        "shift_id": 2,
+        "created_at": "2024-11-11T05:48:44.000000Z",
+        "updated_at": "2024-11-11T05:48:44.000000Z",
+        "nip": null,
+        "type_employee_id": 1,
+        "company_id": 1,
+        "status": 1,
+        "roles": [
+            {
+                "id": 9,
+                "name": "Super Admin",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:17.000000Z",
+                "updated_at": "2024-11-19T23:59:54.000000Z",
+                "pivot": {
+                    "model_type": "App\\Models\\User",
+                    "model_id": 1,
+                    "role_id": 9
+                },
+                "permissions": [
+                    {
+                        "id": 9,
+                        "name": "dashboard",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:17.000000Z",
+                        "updated_at": "2024-11-19T23:44:17.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 9
+                        }
+                    },
+                    {
+                        "id": 10,
+                        "name": "employee",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:19.000000Z",
+                        "updated_at": "2024-11-19T23:44:19.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 10
+                        }
+                    },
+                    {
+                        "id": 11,
+                        "name": "role",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:20.000000Z",
+                        "updated_at": "2024-11-19T23:44:20.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 11
+                        }
+                    },
+                    {
+                        "id": 12,
+                        "name": "company",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:20.000000Z",
+                        "updated_at": "2024-11-19T23:44:20.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 12
+                        }
+                    },
+                    {
+                        "id": 13,
+                        "name": "report",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:22.000000Z",
+                        "updated_at": "2024-11-19T23:44:22.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 13
+                        }
+                    }
+                ]
+            }
+        ],
+        "permissions": []
+    }
+}
+```
+
+### LOGOUT
+
+POST
+/logout
+
+Response
+```
+{
+    "success": true,
+    "message": "Logout Success"
+}
+```
+
+### ME
+
+GET
+/me
+
+Response
+```
+{
+    "success": true,
+    "user": {
+        "id": 1,
+        "name": "Admin",
+        "email": "admin@gmail.com",
+        "email_verified_at": null,
+        "pin": "123456",
+        "shift_id": 2,
+        "created_at": "2024-11-11T05:48:44.000000Z",
+        "updated_at": "2024-11-11T05:48:44.000000Z",
+        "nip": null,
+        "type_employee_id": 1,
+        "company_id": 1,
+        "status": 1,
+        "roles": [
+            {
+                "id": 9,
+                "name": "Super Admin",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:17.000000Z",
+                "updated_at": "2024-11-19T23:59:54.000000Z",
+                "pivot": {
+                    "model_type": "App\\Models\\User",
+                    "model_id": 1,
+                    "role_id": 9
+                },
+                "permissions": [
+                    {
+                        "id": 9,
+                        "name": "dashboard",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:17.000000Z",
+                        "updated_at": "2024-11-19T23:44:17.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 9
+                        }
+                    },
+                    {
+                        "id": 10,
+                        "name": "employee",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:19.000000Z",
+                        "updated_at": "2024-11-19T23:44:19.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 10
+                        }
+                    },
+                    {
+                        "id": 11,
+                        "name": "role",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:20.000000Z",
+                        "updated_at": "2024-11-19T23:44:20.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 11
+                        }
+                    },
+                    {
+                        "id": 12,
+                        "name": "company",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:20.000000Z",
+                        "updated_at": "2024-11-19T23:44:20.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 12
+                        }
+                    },
+                    {
+                        "id": 13,
+                        "name": "report",
+                        "guard_name": "api",
+                        "created_at": "2024-11-19T23:44:22.000000Z",
+                        "updated_at": "2024-11-19T23:44:22.000000Z",
+                        "pivot": {
+                            "role_id": 9,
+                            "permission_id": 13
+                        }
+                    }
+                ]
+            }
+        ],
+        "permissions": []
+    }
+}
+```
+
 ### Dashboard COUNTS
 
 GET
@@ -421,6 +641,194 @@ Response
         "prev_page_url": null,
         "to": 1,
         "total": 1
+    }
+}
+```
+
+### ROLE
+
+GET
+/roles/list
+
+Response
+```
+{
+    "message": "Successfully get all roles",
+    "roles": [
+        {
+            "id": 9,
+            "name": "Super Admin",
+            "guard_name": "api",
+            "created_at": "2024-11-19T23:44:17.000000Z",
+            "updated_at": "2024-11-19T23:59:54.000000Z"
+        },
+        {
+            "id": 10,
+            "name": "Security",
+            "guard_name": "api",
+            "created_at": "2024-11-19T23:44:23.000000Z",
+            "updated_at": "2024-11-19T23:44:23.000000Z"
+        },
+        {
+            "id": 11,
+            "name": "Employee",
+            "guard_name": "api",
+            "created_at": "2024-11-19T23:51:13.000000Z",
+            "updated_at": "2024-11-19T23:51:13.000000Z"
+        }
+    ]
+}
+```
+
+### PERMISSION
+
+GET
+/roles/permissions
+
+Response
+```
+{
+    "message": "Successfully get all permissions",
+    "permissions": {
+        "": [
+            {
+                "id": 9,
+                "name": "dashboard",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:17.000000Z",
+                "updated_at": "2024-11-19T23:44:17.000000Z"
+            },
+            {
+                "id": 10,
+                "name": "employee",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:19.000000Z",
+                "updated_at": "2024-11-19T23:44:19.000000Z"
+            },
+            {
+                "id": 11,
+                "name": "role",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:20.000000Z",
+                "updated_at": "2024-11-19T23:44:20.000000Z"
+            },
+            {
+                "id": 12,
+                "name": "company",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:20.000000Z",
+                "updated_at": "2024-11-19T23:44:20.000000Z"
+            },
+            {
+                "id": 13,
+                "name": "report",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:22.000000Z",
+                "updated_at": "2024-11-19T23:44:22.000000Z"
+            }
+        ]
+    }
+}
+```
+
+### ROLE PER ID
+
+GET
+/roles/edit-role/{id}
+
+Response
+```
+{
+    "status": "Success",
+    "role": {
+        "id": 9,
+        "name": "Super Admin",
+        "guard_name": "api",
+        "created_at": "2024-11-19T23:44:17.000000Z",
+        "updated_at": "2024-11-19T23:59:54.000000Z",
+        "permissions": [
+            {
+                "id": 9,
+                "name": "dashboard",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:17.000000Z",
+                "updated_at": "2024-11-19T23:44:17.000000Z",
+                "pivot": {
+                    "role_id": 9,
+                    "permission_id": 9
+                }
+            },
+            {
+                "id": 10,
+                "name": "employee",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:19.000000Z",
+                "updated_at": "2024-11-19T23:44:19.000000Z",
+                "pivot": {
+                    "role_id": 9,
+                    "permission_id": 10
+                }
+            },
+            {
+                "id": 11,
+                "name": "role",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:20.000000Z",
+                "updated_at": "2024-11-19T23:44:20.000000Z",
+                "pivot": {
+                    "role_id": 9,
+                    "permission_id": 11
+                }
+            },
+            {
+                "id": 12,
+                "name": "company",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:20.000000Z",
+                "updated_at": "2024-11-19T23:44:20.000000Z",
+                "pivot": {
+                    "role_id": 9,
+                    "permission_id": 12
+                }
+            },
+            {
+                "id": 13,
+                "name": "report",
+                "guard_name": "api",
+                "created_at": "2024-11-19T23:44:22.000000Z",
+                "updated_at": "2024-11-19T23:44:22.000000Z",
+                "pivot": {
+                    "role_id": 9,
+                    "permission_id": 13
+                }
+            }
+        ]
+    }
+}
+```
+
+### UPDATE ROLE
+
+POST 
+/roles/update-role/{id}
+
+Body
+```
+{
+    'name' : 'Admin'
+}
+```
+
+Response
+```
+{
+    "message": "Role updated successfully",
+    "role": {
+        "id": 9,
+        "name": "Admin",
+        "guard_name": "api",
+        "created_at": "2024-11-19T23:44:17.000000Z",
+        "updated_at": "2024-11-20T07:57:38.000000Z"
     }
 }
 ```

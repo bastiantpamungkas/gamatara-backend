@@ -21,7 +21,7 @@ class AuthController extends Controller
         if ($valid == true) {
             if ($token = Auth::attempt($credentials)) {
 
-                if (Auth::user()->hasRole(['Admin', 'Security'])) {
+                if (Auth::user()->hasRole(['Super Admin', 'Security'])) {
                     $user = Auth::user();
                     $user->getRoleNames();
                     $user->getAllPermissions();
