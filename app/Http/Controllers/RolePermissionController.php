@@ -10,7 +10,7 @@ class RolePermissionController extends Controller
 {
     public function role()
     {
-        $role = Role::all();
+        $role = Role::orderBy('id', 'asc')->get();
         
         return response()->json([
             'message' => 'Successfully get all roles',
@@ -63,7 +63,7 @@ class RolePermissionController extends Controller
     public function updateRole(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string'
+            'name' => 'required|string',
         ]);
 
         $role = Role::findOrFail($id);
