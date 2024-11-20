@@ -143,15 +143,15 @@ class AttendanceGuestController extends Controller
 
         $guest = Guest::select('id', 'name', 'phone_number')
             ->withCount([
-                'attendance_guest',
-            ])
-            ->when($keyword, function ($q) use ($keyword) {
+                'attendance_guest as total_attendance',
+            ])->when($keyword, function ($q) use ($keyword) {
                 $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . $keyword . '%'])
                 ->orWhereRaw("LOWER(CAST(phone_number AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
             })
             ->paginate($pageSize, ['*'], 'page', $page);
 
-        $guest->getCollection()->transform(function($q) {
+        $guest->getCollection()->transform(function ($q) {
+
             $lastAttendance = $q->attendance_guest()->latest()->first();
 
             if ($lastAttendance) {
@@ -160,8 +160,17 @@ class AttendanceGuestController extends Controller
                 $q->last_visit = null;
             }
 
+            $totalDuration = AttendanceGuest::where('guest_id', $q->id)
+                ->selectRaw(
+                    "TO_CHAR(SUM(EXTRACT(EPOCH FROM CAST(duration AS INTERVAL))) * interval '1 second', 'HH24:MI:SS') as total_duration"
+                )
+                ->value('total_duration');
+
+            $q->total_duration = $totalDuration;
+
             return $q;
         });
+
 
         return response()->json([
             'success' => true,

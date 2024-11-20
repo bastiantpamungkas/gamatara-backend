@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('no_police')->nullable();
             $table->bigInteger('total_guest');
             $table->text('need');
+            $table->string('duration')->nullable();
             $table->timestamps();
         });
     }

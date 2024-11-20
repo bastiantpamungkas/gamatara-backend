@@ -242,3 +242,179 @@ Response
     }
 ]
 ```
+
+### REPORT EMPLOYEE
+
+GET
+/attendance/report
+
+Params
+```
+{
+    'page_size' : 10
+    'page' : 1
+    'keyword' : ''
+    'status' : 1,
+    'most_present' : true,
+    'smallest_late' : true,
+    'most_late' : true
+}
+```
+
+Desciption
+```
+status [
+    1 => 'Aktif'
+    2 => 'Tidak Aktif'
+],
+```
+
+Response
+```
+{
+    "success": true,
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 3,
+                "name": "Employee",
+                "nip": null,
+                "status": 1,
+                "attendance_count": 9,
+                "ontime_attendance": 0,
+                "late_attendance": 8,
+                "early_checkout": 9
+            },
+            {
+                "id": 4,
+                "name": "Employee 1",
+                "nip": null,
+                "status": 1,
+                "attendance_count": 8,
+                "ontime_attendance": 0,
+                "late_attendance": 7,
+                "early_checkout": 8
+            },
+            {
+                "id": 5,
+                "name": "Employee 2",
+                "nip": null,
+                "status": 2,
+                "attendance_count": 8,
+                "ontime_attendance": 0,
+                "late_attendance": 7,
+                "early_checkout": 8
+            },
+            {
+                "id": 1,
+                "name": "Admin",
+                "nip": null,
+                "status": 1,
+                "attendance_count": 1,
+                "ontime_attendance": 0,
+                "late_attendance": 1,
+                "early_checkout": 1
+            },
+            {
+                "id": 2,
+                "name": "Security",
+                "nip": null,
+                "status": 1,
+                "attendance_count": 0,
+                "ontime_attendance": 0,
+                "late_attendance": 0,
+                "early_checkout": 0
+            }
+        ],
+        "first_page_url": "http://127.0.0.1:8000/api/attendance/report?page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://127.0.0.1:8000/api/attendance/report?page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://127.0.0.1:8000/api/attendance/report?page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://127.0.0.1:8000/api/attendance/report",
+        "per_page": 10,
+        "prev_page_url": null,
+        "to": 5,
+        "total": 5
+    }
+}
+```
+
+### REPORT GUEST
+
+GET
+/attendance_guest/report
+
+Params
+```
+{
+    'page_size' : 10,
+    'page' : 1,
+    'keyword' : ''
+}
+```
+
+Response
+```
+{
+    "success": true,
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 1,
+                "name": "Candra",
+                "phone_number": "081234567890",
+                "total_attendance": 1,
+                "last_visit": "2024-11-20 05:07:39",
+                "total_duration": "04:00:00"
+            }
+        ],
+        "first_page_url": "http://127.0.0.1:8000/api/attendance_guest/report?page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://127.0.0.1:8000/api/attendance_guest/report?page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://127.0.0.1:8000/api/attendance_guest/report?page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://127.0.0.1:8000/api/attendance_guest/report",
+        "per_page": 10,
+        "prev_page_url": null,
+        "to": 1,
+        "total": 1
+    }
+}
+```
