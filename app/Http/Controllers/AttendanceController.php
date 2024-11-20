@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Types\Relations\Car;
 
 class AttendanceController extends Controller
 {
@@ -87,28 +88,62 @@ class AttendanceController extends Controller
         $most_present = filter_var($request->input('most_present', false), FILTER_VALIDATE_BOOLEAN);
         $smallest_late = filter_var($request->input('smallest_late', false), FILTER_VALIDATE_BOOLEAN);
         $most_late = filter_var($request->input('most_late', false), FILTER_VALIDATE_BOOLEAN);
+        $month = $request->input('month') ?? null;
 
-        $user = User::select('id', 'name', 'nip', 'status')->withCount(['attendance','attendance as ontime_attendance' => function ($q) {
+        $user = User::select('id', 'name', 'nip', 'status')
+            ->withCount([
+                'attendance' => function ($q) use ($month) {
+                    if ($month) {
+                        $yearMonth = Carbon::parse($month);
+                        $q->whereYear('time_check_in', $yearMonth->year)
+                        ->whereMonth('time_check_in', $yearMonth->month);
+                    }
+                },
+                'attendance as ontime_attendance' => function ($q) use ($month) {
                     $q->where('status_check_in', 2);
+                    if ($month) {
+                        $yearMonth = Carbon::parse($month);
+                        $q->whereYear('time_check_in', $yearMonth->year)
+                        ->whereMonth('time_check_in', $yearMonth->month);
+                    }
                 },
-                'attendance as late_attendance' => function ($q) {
+                'attendance as late_attendance' => function ($q) use ($month) {
                     $q->where('status_check_in', 3);
+                    if ($month) {
+                        $yearMonth = Carbon::parse($month);
+                        $q->whereYear('time_check_in', $yearMonth->year)
+                        ->whereMonth('time_check_in', $yearMonth->month);
+                    }
                 },
-                'attendance as early_checkout' => function ($q) {
+                'attendance as early_checkout' => function ($q) use ($month) {
                     $q->where('status_check_out', 1);
+                    if ($month) {
+                        $yearMonth = Carbon::parse($month);
+                        $q->whereYear('time_check_in', $yearMonth->year)
+                        ->whereMonth('time_check_in', $yearMonth->month);
+                    }
                 },
-            ])->when($keyword, function ($q) use ($keyword) {
+            ])
+            ->when($keyword, function ($q) use ($keyword) {
                 $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . $keyword . '%'])
                 ->orWhereRaw("LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
-            })->when($status, function($q) use ($status){
+            })
+            ->when($status, function ($q) use ($status) {
                 $q->where('status', $status);
-            })->when($most_present, function($q){
+            })
+            ->when($most_present, function ($q) {
                 $q->orderBy('attendance_count', 'desc');
-            })->when($smallest_late, function($q){
+            })
+            ->when($smallest_late, function ($q) {
                 $q->orderBy('late_attendance', 'asc');
-            })->when($most_late, function($q){
+            })
+            ->when($most_late, function ($q) {
                 $q->orderBy('late_attendance', 'desc');
-            })->paginate($pageSize, ['*'], 'page', $page);
+            })
+            ->paginate($pageSize, ['*'], 'page', $page);
+
+
+
 
         return response()->json([
             'success' => true,
