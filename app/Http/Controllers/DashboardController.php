@@ -178,8 +178,8 @@ class DashboardController extends Controller
                     'month_name' => Carbon::create($year, $month)->format('F') 
                 ];
 
-                $attendanceCount = AttendanceGuest::whereYear('date', $year)
-                                  ->whereMonth('date', $month)
+                $attendanceCount = AttendanceGuest::whereYear('time_check_in', $year)
+                                  ->whereMonth('time_check_in', $month)
                                   ->whereNotNull('time_check_out')
                                   ->count();
 

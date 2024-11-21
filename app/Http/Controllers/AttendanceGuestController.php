@@ -9,6 +9,7 @@ use App\Models\Guest;
 use App\Models\AttendanceGuest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceGuestController extends Controller
 {
@@ -140,19 +141,60 @@ class AttendanceGuestController extends Controller
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
         $keyword = strtolower($request->input('keyword', ''));
+        $most_present = filter_var($request->input('most_present', false), FILTER_VALIDATE_BOOLEAN);
+        $smallest_present = filter_var($request->input('smallest_present', false), FILTER_VALIDATE_BOOLEAN);
+        $longest_duration = filter_var($request->input('longest_duration', false), FILTER_VALIDATE_BOOLEAN);
+        $shortest_duration = filter_var($request->input('shortest_duration', false), FILTER_VALIDATE_BOOLEAN);
+        $year = $request->input('year') ?? null;
 
         $guest = Guest::select('id', 'name', 'phone_number')
+            ->when($year, function ($q) use ($year) {
+                $q->whereHas('attendance_guest', function ($query) use ($year) {
+                    $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
+                });
+            })
             ->withCount([
-                'attendance_guest as total_attendance',
-            ])->when($keyword, function ($q) use ($keyword) {
-                $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . $keyword . '%'])
-                ->orWhereRaw("LOWER(CAST(phone_number AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+                'attendance_guest as total_attendance' => function ($query) use ($year) {
+                    if ($year) {
+                        $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
+                    }
+                },
+            ])
+            ->when($most_present, function ($q) {
+                $q->orderBy('total_attendance', 'desc');
+            })
+            ->when($smallest_present, function ($q) {
+                $q->orderBy('total_attendance', 'asc');
+            })
+            ->when($longest_duration, function ($q) {
+                $q->addSelect([
+                    'total_duration' => AttendanceGuest::selectRaw(
+                        "SUM(EXTRACT(EPOCH FROM CAST(duration AS INTERVAL)))"
+                    )
+                        ->whereColumn('attendance_guests.guest_id', 'guests.id'),
+                ])->orderBy('total_duration', 'desc');
+            })
+            ->when($shortest_duration, function ($q) {
+                $q->addSelect([
+                    'total_duration' => AttendanceGuest::selectRaw(
+                        "SUM(EXTRACT(EPOCH FROM CAST(duration AS INTERVAL)))"
+                    )
+                        ->whereColumn('attendance_guests.guest_id', 'guests.id'),
+                ])->orderBy('total_duration', 'asc');
+            })
+            ->when($keyword, function ($q) use ($keyword) {
+                $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . strtolower($keyword) . '%'])
+                    ->orWhereRaw("LOWER(CAST(phone_number AS TEXT)) LIKE ?", ['%' . strtolower($keyword) . '%']);
             })
             ->paginate($pageSize, ['*'], 'page', $page);
 
-        $guest->getCollection()->transform(function ($q) {
-
-            $lastAttendance = $q->attendance_guest()->latest()->first();
+        $guest->getCollection()->transform(function ($q) use ($year) {
+            $lastAttendance = AttendanceGuest::where('guest_id', $q->id)
+                ->when($year, function ($query) use ($year) {
+                    $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
+                })
+                ->latest()
+                ->first();
 
             if ($lastAttendance) {
                 $q->last_visit = $lastAttendance->created_at->format('Y-m-d H:i:s');
@@ -161,6 +203,9 @@ class AttendanceGuestController extends Controller
             }
 
             $totalDuration = AttendanceGuest::where('guest_id', $q->id)
+                ->when($year, function ($query) use ($year) {
+                    $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
+                })
                 ->selectRaw(
                     "TO_CHAR(SUM(EXTRACT(EPOCH FROM CAST(duration AS INTERVAL))) * interval '1 second', 'HH24:MI:SS') as total_duration"
                 )
@@ -170,7 +215,6 @@ class AttendanceGuestController extends Controller
 
             return $q;
         });
-
 
         return response()->json([
             'success' => true,
