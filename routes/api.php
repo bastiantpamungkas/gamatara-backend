@@ -43,6 +43,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('store', [UserController::class, 'store']);
         Route::get('detail/{id}', [UserController::class, 'detail']);
         Route::put('update/{id}', [UserController::class, 'update']);
+        Route::put('update_status', [UserController::class, 'update_status']);
+        Route::put('update_shift', [UserController::class, 'update_shift']);
         Route::delete('delete/{id}', [UserController::class, 'delete']);
     });
 
@@ -87,6 +89,9 @@ Route::middleware(['auth:api'])->group(function () {
     
     Route::prefix('companies')->group(function () {
         Route::get('list', [CompanyController::class, 'list']);
+        Route::get('detail/{id}', [CompanyController::class, 'detail']);
+        Route::post('store', [CompanyController::class, 'store']);
+        Route::put('update/{id}', [CompanyController::class, 'update']);
     });
     
 

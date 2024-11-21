@@ -17,7 +17,9 @@ class AttendanceController extends Controller
         $shift = $request->input('shift') ?? null;
         $status_checkin = $request->input('status_checkin') ?? null;
         $status_checkout = $request->input('status_checkout') ?? null;
-        $company = $request->input('company') ?? null;z
+        $company = $request->input('company') ?? null;
+        $start_date = $request->input('start_date') ?? null;
+        $end_date = $request->input('end_date') ?? null;
 
         $att = Attendance::with(['user.shift', 'user.company', 'user.type'])->whereHas('user.shift', function ($q) use ($shift) {
                 if ($shift) {
@@ -35,6 +37,13 @@ class AttendanceController extends Controller
         
         if($status_checkout){
             $att->where('status_check_out', $status_checkout);
+        }
+
+        if ($start_date && $end_date) {
+            $att->where(function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('time_check_in', [$start_date, $end_date])
+                      ->orWhereBetween('time_check_out', [$start_date, $end_date]);
+            });
         }
 
         $att = Helper::pagination($att, $request, [

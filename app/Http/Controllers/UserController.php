@@ -10,7 +10,7 @@ class UserController extends Controller
 {
     public function list(Request $request)
     {
-        $user = Helper::pagination(User::with('type', 'company'), $request, ['name', 'email']);
+        $user = Helper::pagination(User::with('type', 'company', 'shift'), $request, ['name', 'email']);
 
         return response()->json([
             'success' => true,
@@ -21,17 +21,19 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $valid = Helper::validator($request->all(), [
+            'nip' => 'required',
             'name' => 'required',
-            'email' => 'email|required',
+            'email' => 'email|required|unique:users,email',
             'password' => 'required',
-            'shift_id' => 'required'
+            'type_employee_id' => 'required',
+            'company_id' => 'required',
         ]);
 
         if ($valid == true) {
             try {
                 $user = User::create($request->all());
 
-                $user->assignRole('Employee');
+                $user->assignRole($request->role);
 
                 return response()->json([
                     'success' => true,
@@ -54,7 +56,7 @@ class UserController extends Controller
 
     public function detail($id)
     {
-        $user = User::find($id);
+        $user = User::with('type', 'company', 'shift')->find($id);
 
         if (!$user) {
             return response()->json([
@@ -62,6 +64,8 @@ class UserController extends Controller
                 'message' => "Employee Not Found",
             ], 404);
         }
+
+        $user->getRoleNames();
 
         return response()->json([
             'success' => true,
@@ -72,10 +76,12 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $valid = Helper::validator($request->all(), [
+            'nip' => 'required',
             'name' => 'required',
-            'email' => 'email|required',
+            'email' => 'email|required|unique:users,email,' . $id,
             'password' => 'required',
-            'shift_id' => 'required'
+            'type_employee_id' => 'required',
+            'company_id' => 'required',
         ]);
 
         if ($valid == true) {
@@ -90,6 +96,10 @@ class UserController extends Controller
                 }
 
                 $user->update($request->all());
+
+                $user->syncRoles([]);
+
+                $user->assignRole($request->role);
 
                 return response()->json([
                     'success' => true,
@@ -134,5 +144,51 @@ class UserController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    public function update_status(Request $request){
+        $ids = $request->input('ids');
+        $status = $request->input('status', 1);
+
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No IDs provided.'
+            ], 422);
+        }
+
+        $user = User::whereIn('id', $ids);
+
+        $user->update(['status' => $status]);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Success Update Status Employee',
+            'data' => User::whereIn('id', $ids)->get()
+        ],200);
+    }
+    
+    public function update_shift(Request $request){
+        $ids = $request->input('ids');
+        $shift_id = $request->input('shift_id', 1);
+
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No IDs provided.'
+            ], 422);
+        }
+
+        $user = User::whereIn('id', $ids);
+
+        $user->update(['shift_id' => $shift_id]);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Success Update Shift Employee',
+            'data' => User::whereIn('id', $ids)->get()
+        ],200);
     }
 }
