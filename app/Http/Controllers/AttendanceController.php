@@ -17,7 +17,7 @@ class AttendanceController extends Controller
         $shift = $request->input('shift') ?? null;
         $status_checkin = $request->input('status_checkin') ?? null;
         $status_checkout = $request->input('status_checkout') ?? null;
-        $company = $request->input('company') ?? null;
+        $company = $request->input('company') ?? null;z
 
         $att = Attendance::with(['user.shift', 'user.company', 'user.type'])->whereHas('user.shift', function ($q) use ($shift) {
                 if ($shift) {
