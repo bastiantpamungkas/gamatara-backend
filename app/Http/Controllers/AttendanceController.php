@@ -153,12 +153,63 @@ class AttendanceController extends Controller
 
     public function post_att(Request $request){
 
+        $attender = User::where('pin', $request->pin)->first();
+
+        $checkin_time = str_replace("T", " ", $request->event_time);
+
+        if (!$attender) {
+            $new_attender = User::create([
+                'name'              => $request->name,
+                'email'             => strtolower(str_replace(" ", "", $request->name)) . '@gmail.com',
+                'pin'               => $request->pin,
+                'type_employee_id'  => $request->dept_code == 1 ? 1 : 0,
+            ]);
+
+            $attendance = Attendance::create([
+                'user_id' => $new_attender->id,
+                'time_check_in' => $checkin_time,
+                'status_check_in' => 2,
+                'status_check_out' => 0,
+            ]);
+    
+            if ($attendance) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Attendance recorded successfully',
+                    'attendance' => $attendance
+                ], 200);
+            }
+        }
+
+        // TODO: create attender in attendances table  
+        $attendance = Attendance::create([
+            'user_id' => $attender->id,
+            'time_check_in' => $checkin_time,
+            'status_check_in' => 2,
+            'status_check_out' => 0,
+        ]);
+
+        if ($attendance) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Attendance recorded successfully',
+                'attendance' => $attendance
+            ], 200);
+        }
+
+        // TODO: insert data (injection) from ZKTeco to Batik Payroll in table att_log
+        // TODO: connect to ably and send message with channel gate
+        
         Log::info([
             'data' => $request->all()
         ]);
 
-        return response()->json([
-            'data' => $request->all()
-        ]);
+        // return response()->json([
+        //     'data' => [
+        //         'nama_karyawan' => $request->name,
+        //         'SN' => $request->dev_sn,
+        //         'user_id' => $request->pin,
+        //     ]
+        // ]);
     }
 }
