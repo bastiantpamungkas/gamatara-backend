@@ -4,6 +4,7 @@ use App\Events\AttendanceRealtimeEvent;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceGuestController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaceScanController;
 use App\Http\Controllers\ShiftController;
@@ -83,6 +84,11 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('edit-role/{id}', [RolePermissionController::class, 'editRole']);
         Route::post('update-role/{id}', [RolePermissionController::class, 'updateRole']);
     });
+    
+    Route::prefix('companies')->group(function () {
+        Route::get('list', [CompanyController::class, 'list']);
+    });
+    
 
     // Router lainnya
 });
