@@ -15,7 +15,7 @@ class Helper
             return response()->json([
                 'success' => false,
                 'message' => $validation->errors()
-            ], 422);
+            ], 422);    
         } else {
             return true;
         }
@@ -52,5 +52,15 @@ class Helper
         });
 
         return $data->paginate($pageSize, ['*'], 'page', $page);
+    }
+
+    public static function statusAtt($status){
+        if($status == 1){
+            return 'Masuk Lebih Awal';
+        }else if($status == 2){
+            return 'Masuk Tepat Waktu';
+        }else{
+            return 'Terlambat Masuk';
+        }
     }
 }

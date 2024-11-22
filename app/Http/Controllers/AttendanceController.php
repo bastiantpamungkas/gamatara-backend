@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Ably\AblyRest;
+use Ably\Http;
 use App\Helpers\Helper;
 use App\Models\Attendance;
+use App\Models\Shift;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -162,23 +165,45 @@ class AttendanceController extends Controller
 
     public function post_att(Request $request){
 
-        $attender = User::where('pin', $request->pin)->first();
-
         $checkin_time = str_replace("T", " ", $request->event_time);
 
-        if (!$attender) {
+        $attender = User::where('pin', $request->pin);
+
+        if ($attender->exists()) {
+
+            $attender = $attender->first();
+
+            if($attender && $attender->shift_id){
+                $shift = Shift::find($attender->shift_id);
+
+                $time = Carbon::parse($checkin_time)->format('H:i:s');
+
+                if($time < $shift->early_check_in){
+                    $status = 1;
+                }else if($time > $shift->early_check_in && $time < $shift->check_in){
+                    $status = 2;
+                }else{
+                    $status = 3;
+                }
+            }
+
+            $attendance = Attendance::create([
+                'user_id' => $attender->id,
+                'time_check_in' => $checkin_time,
+                'status_check_in' => $status ?? 2,
+            ]);
+        }else{
             $new_attender = User::create([
                 'name'              => $request->name,
                 'email'             => strtolower(str_replace(" ", "", $request->name)) . '@gmail.com',
                 'pin'               => $request->pin,
-                'type_employee_id'  => $request->dept_code == 1 ? 1 : 0,
+                'type_employee_id'  => $request->dept_code ?? 0,
             ]);
 
             $attendance = Attendance::create([
                 'user_id' => $new_attender->id,
                 'time_check_in' => $checkin_time,
                 'status_check_in' => 2,
-                'status_check_out' => 0,
             ]);
     
             if ($attendance) {
@@ -190,13 +215,18 @@ class AttendanceController extends Controller
             }
         }
 
-        // TODO: create attender in attendances table  
-        $attendance = Attendance::create([
-            'user_id' => $attender->id,
-            'time_check_in' => $checkin_time,
-            'status_check_in' => 2,
-            'status_check_out' => 0,
-        ]);
+        $data = [
+            'name' => $attender->name,
+            'accessStatus' => "Check In",
+            'role' => $attender->getRoleNames(),
+            'entryTime' => Carbon::now()->format('Y-m-d H:i:s'),
+            'status' => Helper::statusAtt($status ?? 2)
+        ];
+
+        $ably = new AblyRest(env('ABLY_KEY'));
+
+        $channel = $ably->channels->get('gate');
+        $channel->publish('message', $data);
 
         if ($attendance) {
             return response()->json([
@@ -205,20 +235,5 @@ class AttendanceController extends Controller
                 'attendance' => $attendance
             ], 200);
         }
-
-        // TODO: insert data (injection) from ZKTeco to Batik Payroll in table att_log
-        // TODO: connect to ably and send message with channel gate
-        
-        Log::info([
-            'data' => $request->all()
-        ]);
-
-        // return response()->json([
-        //     'data' => [
-        //         'nama_karyawan' => $request->name,
-        //         'SN' => $request->dev_sn,
-        //         'user_id' => $request->pin,
-        //     ]
-        // ]);
     }
 }
