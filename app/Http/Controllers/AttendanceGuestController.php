@@ -112,8 +112,15 @@ class AttendanceGuestController extends Controller
                 ], 404);
             }
 
+            $timeCheckIn = Carbon::parse($att_guest->time_check_in);
+
+            $timeNow = Carbon::now();
+
+            $diff = $timeCheckIn->diff($timeNow);
+
             $att_guest->update([
-                'time_check_out' => Carbon::now()->format('Y-m-d H:i:s')
+                'time_check_out' => Carbon::now()->format('Y-m-d H:i:s'),
+                'duration' => $diff
             ]);
 
             return response()->json([
