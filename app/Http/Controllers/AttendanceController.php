@@ -171,6 +171,14 @@ class AttendanceController extends Controller
         $attender = User::where('pin', $request->pin);
 
         if ($attender->exists()) {
+            $check_present = Attendance::where('user_id', $attender->id)->first();
+
+            if ($check_present) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Selamat datang ' . $attender->name
+                ], 200);
+            }
 
             $attender = $attender->first();
 
