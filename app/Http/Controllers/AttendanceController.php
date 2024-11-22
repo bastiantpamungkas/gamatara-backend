@@ -26,14 +26,15 @@ class AttendanceController extends Controller
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ?? null;
 
-        $att = Attendance::with(['user.shift', 'user.company', 'user.type'])->orWhereDoesntHave('user.shift')->orWhereDoesntHave('user.company')->whereHas('user.shift', function ($q) use ($shift) {
-                if ($shift) {
+        $att = Attendance::with(['user.shift', 'user.company', 'user.type'])->when($shift, function ($query) use ($shift) {
+                $query->whereHas('user.shift', function ($q) use ($shift) {
                     $q->where('id', $shift);
-                }
-            })->whereHas('user.company', function ($q) use ($company) {
-                if ($company) {
+                });
+            })
+            ->when($company, function ($query) use ($company) {
+                $query->whereHas('user.company', function ($q) use ($company) {
                     $q->where('id', $company);
-                }
+                });
             });
 
         if($status_checkin){
