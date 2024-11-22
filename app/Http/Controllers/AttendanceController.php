@@ -26,7 +26,7 @@ class AttendanceController extends Controller
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ?? null;
 
-        $att = Attendance::with(['user.shift', 'user.company', 'user.type'])->whereHas('user.shift', function ($q) use ($shift) {
+        $att = Attendance::with(['user.shift', 'user.company', 'user.type'])->orWhereDoesntHave('user.shift')->orWhereDoesntHave('user.company')->whereHas('user.shift', function ($q) use ($shift) {
                 if ($shift) {
                     $q->where('id', $shift);
                 }
@@ -167,7 +167,7 @@ class AttendanceController extends Controller
 
     public function post_att(Request $request)
     {
-        $checkin_time = str_replace("T", " ", $request->event_time);
+        $check_time = str_replace("T", " ", $request->event_time);
         $attender = User::where('pin', $request->pin)->first();
         $st_inorout = MachineSetting::where('sn_machine', $request->dev_sn)->first();    
 
@@ -189,7 +189,7 @@ class AttendanceController extends Controller
         }
 
         $shift = $attender->shift_id ? Shift::find($attender->shift_id) : null;
-        $time = Carbon::parse($checkin_time)->format('H:i:s');
+        $time = Carbon::parse($check_time)->format('H:i:s');
         $status_in = $shift ? $status($time, $shift, 'early_check_in', 'check_in') : 2;
         $status_out = $shift ? $status($time, $shift, 'early_check_out', 'check_out') : 2;
 
@@ -206,7 +206,7 @@ class AttendanceController extends Controller
 
                 Attendance::create([
                     'user_id'         => $attender->id,
-                    'time_check_in'   => $checkin_time,
+                    'time_check_in'   => $check_time,
                     'status_check_in' => $status_in,
                 ]);
             } else {
@@ -219,6 +219,12 @@ class AttendanceController extends Controller
                     ], 200);
                 }
 
+                $timeCheckIn = Carbon::parse($check_present->time_check_in);
+
+                $timeNow = Carbon::now();
+
+                $diff = $timeCheckIn->diff($timeNow);
+
                 $attendance = Attendance::where('user_id', $attender->id)
                     ->whereNull('time_check_out')
                     ->latest()
@@ -226,8 +232,9 @@ class AttendanceController extends Controller
 
                 if ($attendance) {
                     $attendance->update([
-                        'time_check_out'  => $checkin_time,
+                        'time_check_out'  => $check_time,
                         'status_check_out'=> $status_out,
+                        'time_total' => $diff
                     ]);
                 }
             }
