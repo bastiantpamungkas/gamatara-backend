@@ -202,7 +202,7 @@ class AttendanceController extends Controller
             }
         }else{
             try{
-                $new_attender = User::create([
+                $attender = User::create([
                     'name'              => $request->name,
                     'email'             => strtolower(str_replace(" ", "", $request->name)) . '@gmail.com',
                     'pin'               => $request->pin,
@@ -210,7 +210,7 @@ class AttendanceController extends Controller
                 ]);
     
                 $attendance = Attendance::create([
-                    'user_id' => $new_attender->id,
+                    'user_id' => $attender->id,
                     'time_check_in' => $checkin_time,
                     'status_check_in' => 2,
                 ]);
