@@ -195,12 +195,30 @@ class AttendanceController extends Controller
 
         try {
             if ($st_inorout && $st_inorout->status == "IN") {
+                $check_present = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
+
+                if ($check_present->exists()) {
+                    return response()->json([
+                        'status' => true,
+                        'message' => 'Selamat datang ' . $attender->name, 
+                    ], 200);
+                }
+
                 Attendance::create([
                     'user_id'         => $attender->id,
                     'time_check_in'   => $checkin_time,
                     'status_check_in' => $status_in,
                 ]);
             } else {
+                $check_present = Attendance::where('user_id', $attender->id)->whereDate('time_check_out', Carbon::now()->format('Y-m-d'));
+
+                if ($check_present->exists()) {
+                    return response()->json([
+                        'status' => true,
+                        'message' => 'Sampai jumpa ' . $attender->name, 
+                    ], 200);
+                }
+
                 $attendance = Attendance::where('user_id', $attender->id)
                     ->whereNull('time_check_out')
                     ->latest()

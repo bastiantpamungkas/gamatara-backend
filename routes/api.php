@@ -98,7 +98,7 @@ Route::middleware(['auth:api'])->group(function () {
     // Router lainnya
 });
 
-// Abli 
+// Ably 
 Route::get('/attendance_realtime', function (Request $request) {
     $channelName = 'attendance-gamatara-channel';
     $attendanceController = new AttendanceController();
