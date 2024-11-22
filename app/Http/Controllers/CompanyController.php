@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class CompanyController extends Controller
 {
     public function list(Request $request){
-        $data = Helper::pagination(Company::query(), $request, [
+        $data = Helper::pagination(Company::$manyMethodsorderBy('created_at', 'desc'), $request, [
             'name'
         ]);
         

@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class TypeEmployeeController extends Controller
 {
     public function list(){
-        $data = TypeEmployee::all();
+        $data = TypeEmployee::orderBy('created_at', 'desc')->get();
 
         return response()->json($data);
     }

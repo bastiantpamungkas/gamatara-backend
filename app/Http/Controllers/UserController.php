@@ -10,7 +10,7 @@ class UserController extends Controller
 {
     public function list(Request $request)
     {
-        $user = Helper::pagination(User::with('type', 'company', 'shift'), $request, ['name', 'email']);
+        $user = Helper::pagination(User::with('type', 'company', 'shift')->orderBy('created_at', 'desc'), $request, ['name', 'email']);
 
         return response()->json([
             'success' => true,

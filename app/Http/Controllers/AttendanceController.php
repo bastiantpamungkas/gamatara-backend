@@ -51,7 +51,7 @@ class AttendanceController extends Controller
             });
         }
 
-        $att = Helper::pagination($att, $request, [
+        $att = Helper::pagination($att->orderBy('created_at', 'desc'), $request, [
             'time_check_in',
             'time_check_out',
             'user.name',
@@ -66,7 +66,7 @@ class AttendanceController extends Controller
 
     public function list_per_employee(Request $request, $id)
     {
-        $att = Helper::pagination(Attendance::with('user')->where('user_id', $id), $request, [
+        $att = Helper::pagination(Attendance::with('user')->where('user_id', $id)->orderBy('created_at', 'desc'), $request, [
             'time_check_in',
             'time_check_out'
         ]);
@@ -169,7 +169,7 @@ class AttendanceController extends Controller
     {
         $checkin_time = str_replace("T", " ", $request->event_time);
         $attender = User::where('pin', $request->pin)->first();
-        $st_inorout = MachineSetting::where('sn_machine', $request->dev_sn)->first();
+        $st_inorout = MachineSetting::where('sn_machine', $request->dev_sn)->first();    
 
         $status = function ($time, $shift, $early, $normal) {
             return $time < $shift->$early ? 1 : ($time < $shift->$normal ? 2 : 3);
@@ -246,7 +246,6 @@ class AttendanceController extends Controller
         ], 422);
     }
 
-    // Helper to publish data to Ably
     private function publishToAbly($channelName, $data)
     {
         $ably = new AblyRest(env('ABLY_KEY'));

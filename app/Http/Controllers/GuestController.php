@@ -10,7 +10,7 @@ class GuestController extends Controller
 {
     public function list(Request $request)
     {
-        $guest = Helper::pagination(Guest::query(), $request , ['name', 'nik', 'phone_number']);
+        $guest = Helper::pagination(Guest::orderBy('created_at', 'desc'), $request , ['name', 'nik', 'phone_number']);
 
         return response()->json([
             'success' => true,

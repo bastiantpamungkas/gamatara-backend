@@ -10,7 +10,7 @@ class ShiftController extends Controller
 {
     public function list(Request $request)
     {
-        $shift = Helper::pagination(Shift::query(), $request, [
+        $shift = Helper::pagination(Shift::orderBy('created_at', 'desc'), $request, [
             'name',
             'early_check_in',
             'check_in',

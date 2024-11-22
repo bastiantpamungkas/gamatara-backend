@@ -15,7 +15,7 @@ class AttendanceGuestController extends Controller
 {
     public function list(Request $request)
     {
-        $att_guest = Helper::pagination(AttendanceGuest::with('guest'), $request, ['guest.name', 'date', 'time_check_in', 'time_check_out']);
+        $att_guest = Helper::pagination(AttendanceGuest::with('guest')->orderBy('created_at', 'desc'), $request, ['guest.name', 'date', 'time_check_in', 'time_check_out']);
 
         return response()->json([
             'success' => true,
