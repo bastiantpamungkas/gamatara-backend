@@ -9,6 +9,7 @@ use App\Models\Attendance;
 use App\Models\Shift;
 use App\Models\User;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Types\Relations\Car;
@@ -187,34 +188,40 @@ class AttendanceController extends Controller
                 }
             }
 
-            $attendance = Attendance::create([
-                'user_id' => $attender->id,
-                'time_check_in' => $checkin_time,
-                'status_check_in' => $status ?? 2,
-            ]);
-        }else{
-            $new_attender = User::create([
-                'name'              => $request->name,
-                'email'             => strtolower(str_replace(" ", "", $request->name)) . '@gmail.com',
-                'pin'               => $request->pin,
-                'type_employee_id'  => $request->dept_code ?? 0,
-            ]);
-
-            $attendance = Attendance::create([
-                'user_id' => $new_attender->id,
-                'time_check_in' => $checkin_time,
-                'status_check_in' => 2,
-            ]);
-    
-            if ($attendance) {
+            try{
+                $attendance = Attendance::create([
+                    'user_id' => $attender->id,
+                    'time_check_in' => $checkin_time,
+                    'status_check_in' => $status ?? 2,
+                ]);
+            }catch(Exception $e){
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Attendance recorded successfully',
-                    'attendance' => $attendance
-                ], 200);
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+        }else{
+            try{
+                $new_attender = User::create([
+                    'name'              => $request->name,
+                    'email'             => strtolower(str_replace(" ", "", $request->name)) . '@gmail.com',
+                    'pin'               => $request->pin,
+                    'type_employee_id'  => $request->dept_code ?? 0,
+                ]);
+    
+                $attendance = Attendance::create([
+                    'user_id' => $new_attender->id,
+                    'time_check_in' => $checkin_time,
+                    'status_check_in' => 2,
+                ]);
+            }catch (Exception $e){
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
             }
         }
-
+        
         $data = [
             'name' => $attender->name,
             'accessStatus' => "Check In",
@@ -228,12 +235,10 @@ class AttendanceController extends Controller
         $channel = $ably->channels->get('gate');
         $channel->publish('message', $data);
 
-        if ($attendance) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Attendance recorded successfully',
-                'attendance' => $attendance
-            ], 200);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Attendance recorded successfully',
+            'attendance' => $attendance
+        ], 200);
     }
 }
