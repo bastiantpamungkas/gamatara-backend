@@ -220,7 +220,7 @@ class AttendanceController extends Controller
                     ], 200);
                 }
 
-                $timeCheckIn = Carbon::parse($check_present->time_check_in);
+                $timeCheckIn = Carbon::parse($check_present->first()->time_check_in);
 
                 $timeNow = Carbon::now();
 
