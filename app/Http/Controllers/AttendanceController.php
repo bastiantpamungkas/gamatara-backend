@@ -6,6 +6,7 @@ use Ably\AblyRest;
 use Ably\Http;
 use App\Helpers\Helper;
 use App\Models\Attendance;
+use App\Models\MachineSetting;
 use App\Models\Shift;
 use App\Models\User;
 use Carbon\Carbon;
@@ -164,81 +165,93 @@ class AttendanceController extends Controller
         ], 200);
     }
 
-    public function post_att(Request $request){
-
+    public function post_att(Request $request)
+    {
         $checkin_time = str_replace("T", " ", $request->event_time);
+        $attender = User::where('pin', $request->pin)->first();
+        $st_inorout = MachineSetting::where('sn_machine', $request->dev_sn)->first();
 
-        $attender = User::where('pin', $request->pin);
+        $status = function ($time, $shift, $early, $normal) {
+            return $time < $shift->$early ? 1 : ($time < $shift->$normal ? 2 : 3);
+        };
 
-        if ($attender->exists()) {
-
-            $attender = $attender->first();
-
-            if($attender && $attender->shift_id){
-                $shift = Shift::find($attender->shift_id);
-
-                $time = Carbon::parse($checkin_time)->format('H:i:s');
-
-                if($time < $shift->early_check_in){
-                    $status = 1;
-                }else if($time > $shift->early_check_in && $time < $shift->check_in){
-                    $status = 2;
-                }else{
-                    $status = 3;
-                }
-            }
-
-            try{
-                $attendance = Attendance::create([
-                    'user_id' => $attender->id,
-                    'time_check_in' => $checkin_time,
-                    'status_check_in' => $status ?? 2,
-                ]);
-            }catch(Exception $e){
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                ], 422);
-            }
-        }else{
-            try{
+        if (!$attender) {
+            try {
                 $attender = User::create([
-                    'name'              => $request->name,
-                    'email'             => strtolower(str_replace(" ", "", $request->name)) . '@gmail.com',
-                    'pin'               => $request->pin,
-                    'type_employee_id'  => $request->dept_code ?? 0,
+                    'name'             => $request->name,
+                    'email'            => strtolower(str_replace(" ", "", $request->name)) . '@gmail.com',
+                    'pin'              => $request->pin,
+                    'type_employee_id' => $request->dept_code ?? 0,
                 ]);
-    
-                $attendance = Attendance::create([
-                    'user_id' => $attender->id,
-                    'time_check_in' => $checkin_time,
-                    'status_check_in' => 2,
-                ]);
-            }catch (Exception $e){
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                ], 422);
+            } catch (Exception $e) {
+                return $this->responseError($e->getMessage());
             }
         }
-        
+
+        $shift = $attender->shift_id ? Shift::find($attender->shift_id) : null;
+        $time = Carbon::parse($checkin_time)->format('H:i:s');
+        $status_in = $shift ? $status($time, $shift, 'early_check_in', 'check_in') : 2;
+        $status_out = $shift ? $status($time, $shift, 'early_check_out', 'check_out') : 2;
+
+        try {
+            if ($st_inorout && $st_inorout->status == "IN") {
+                Attendance::create([
+                    'user_id'         => $attender->id,
+                    'time_check_in'   => $checkin_time,
+                    'status_check_in' => $status_in,
+                ]);
+            } else {
+                $attendance = Attendance::where('user_id', $attender->id)
+                    ->whereNull('time_check_out')
+                    ->latest()
+                    ->first();
+
+                if ($attendance) {
+                    $attendance->update([
+                        'time_check_out'  => $checkin_time,
+                        'status_check_out'=> $status_out,
+                    ]);
+                }
+            }
+        } catch (Exception $e) {
+            return $this->responseError($e->getMessage());
+        }
+
+        $greeting = $st_inorout && $st_inorout->status == "IN" ? "Selamat Datang {$attender->name}" : "Sampai Jumpa {$attender->name}";
+        $entry_time_status = $st_inorout && $st_inorout->status == "IN" ? "Masuk" : "Keluar";
+        $access_status = $st_inorout && $st_inorout->status == "IN" ? "Check In" : "Check Out";
+
         $data = [
-            'name' => $attender->name,
-            'accessStatus' => "Check In",
-            'role' => $attender->getRoleNames(),
-            'entryTime' => Carbon::now()->format('Y-m-d H:i:s'),
-            'status' => Helper::statusAtt($status ?? 2)
+            'name'         => $attender->name,
+            'greeting'     => $greeting,
+            'accessStatus' => $access_status,
+            'role'         => $attender->getRoleNames(),
+            'entryTime'    => $entry_time_status . Carbon::now()->format('Y-m-d H:i:s'),
+            'status'       => Helper::statusAtt($status_in ?? 2),
         ];
 
-        $ably = new AblyRest(env('ABLY_KEY'));
-
-        $channel = $ably->channels->get('gate');
-        $channel->publish('message', $data);
+        $this->publishToAbly('gate', $data);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Attendance recorded successfully',
-            'attendance' => $attendance
+            'success'    => true,
+            'message'    => 'Attendance recorded successfully',
         ], 200);
     }
+
+    private function responseError($message)
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], 422);
+    }
+
+    // Helper to publish data to Ably
+    private function publishToAbly($channelName, $data)
+    {
+        $ably = new AblyRest(env('ABLY_KEY'));
+        $channel = $ably->channels->get($channelName);
+        $channel->publish('message', $data);
+    }
+
 }
