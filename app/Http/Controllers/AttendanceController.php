@@ -235,7 +235,7 @@ class AttendanceController extends Controller
             return $this->responseError($e->getMessage());
         }
 
-        $greeting = $st_inorout && $st_inorout->status == "IN" ? "Selamat Datang {$attender->name}" : "Sampai Jumpa {$attender->name}";
+        $greeting = $st_inorout && $st_inorout->status == "IN" ? "Selamat Datang" : "Sampai Jumpa";
         $entry_time_status = $st_inorout && $st_inorout->status == "IN" ? "Masuk" : "Keluar";
         $access_status = $st_inorout && $st_inorout->status == "IN" ? "Check In" : "Check Out";
 
