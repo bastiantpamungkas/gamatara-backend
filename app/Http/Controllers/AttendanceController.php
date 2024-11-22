@@ -220,7 +220,9 @@ class AttendanceController extends Controller
                     ], 200);
                 }
 
-                $timeCheckIn = Carbon::parse($check_present->first()->time_check_in);
+                $att_in = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->first();          
+
+                $timeCheckIn = Carbon::parse($att_in->time_check_in);
 
                 $timeNow = Carbon::now();
 
