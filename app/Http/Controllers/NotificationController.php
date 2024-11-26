@@ -31,14 +31,7 @@ class NotificationController extends Controller
                 }
             }
         }
-
-        if(!$notif){
-            return response()->json([
-                'success' => false,
-                'data' => $notif
-            ],422);
-        }
-
+        
         return response()->json([
             'success' => true,
             'data' => $notif
