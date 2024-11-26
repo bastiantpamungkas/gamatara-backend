@@ -25,7 +25,7 @@ class NotificationController extends Controller
                 if ($now->greaterThanOrEqualTo($shiftCheckOut) && $now->lessThan($shiftLateCheckOut)) {
                     $notif[] = [
                         'user_id' => $attendance->user_id,
-                        'message' => "Hi {$attendance->user->name}, Sudah Saatnya Absen Keluar",
+                        'message' => "Karyawan {$attendance->user->name}, Sudah Saatnya Untuk Absen Keluar",
                     ];
                 }
             }
