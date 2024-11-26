@@ -11,6 +11,6 @@ class Company extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'id', 'company_id');
+        return $this->hasOne(User::class, 'company_id', 'id');
     }
 }

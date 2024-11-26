@@ -10,6 +10,7 @@ use App\Http\Controllers\FaceScanController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\TypeEmployeeController;
 use Illuminate\Http\Request;
@@ -30,6 +31,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
     Route::get('type_employee', [TypeEmployeeController::class, 'list']);
+
+    Route::get('notif', [NotificationController::class, 'get_notif']);
 
     Route::prefix('dashboard')->group(function () {
         Route::get('counts', [DashboardController::class, 'counts']);

@@ -358,52 +358,136 @@ Response
         "current_page": 1,
         "data": [
             {
-                "id": 1,
-                "user_id": 3,
-                "time_check_in": "2024-11-12 10:00:00",
-                "time_check_out": "2024-11-12 17:00:00",
-                "time_total": "08:00:00",
-                "status_check_in": 1,
-                "status_check_out": 1,
-                "created_at": "2024-11-11T06:46:31.000000Z",
-                "updated_at": "2024-11-11T06:46:31.000000Z",
-                "user": [
-                    {
-                        "id": 3,
-                        "name": "Employee",
-                        "email": "employee@gmail.com",
-                        "email_verified_at": null,
-                        "pin": "123456",
-                        "shift_id": 1,
-                        "created_at": "2024-11-11T21:35:58.000000Z",
-                        "updated_at": "2024-11-11T21:35:58.000000Z",
-                        "nip": null,
-                        "type_employee_id": 1,
-                        "company_id": 1,
-                        "shift": [
-                            {
-                                "id": 1,
-                                "name": "Shift Ketika",
-                                "early_check_in": "11:41:00",
-                                "check_in": "15:43:00",
-                                "late_check_in": "13:42:00",
-                                "early_check_out": "11:42:00",
-                                "check_out": "14:42:00",
-                                "late_check_out": "13:42:00",
-                                "created_at": "2024-11-11T21:39:48.000000Z",
-                                "updated_at": "2024-11-11T21:39:48.000000Z"
-                            }
-                        ],
-                        "company": [
-                            {
-                                "id": 1,
-                                "name": "GAMATARA",
-                                "created_at": "2024-11-18T23:09:06.000000Z",
-                                "updated_at": "2024-11-18T23:09:06.000000Z"
-                            }
-                        ]
+                "id": 92,
+                "user_id": 37,
+                "time_check_in": "2024-11-23 23:25:04",
+                "time_check_out": "2024-11-23 23:25:40",
+                "time_total": "00:00:42",
+                "status_check_in": 2,
+                "status_check_out": 2,
+                "created_at": "2024-11-23T16:25:11.000000Z",
+                "updated_at": "2024-11-23T16:25:46.000000Z",
+                "user": {
+                    "id": 37,
+                    "name": "ANTO",
+                    "email": "anto@gmail.com",
+                    "email_verified_at": null,
+                    "pin": "2021052",
+                    "shift_id": null,
+                    "created_at": "2024-11-23T16:25:11.000000Z",
+                    "updated_at": "2024-11-23T16:25:11.000000Z",
+                    "nip": null,
+                    "type_employee_id": 1,
+                    "company_id": null,
+                    "status": 1,
+                    "shift": null,
+                    "company": null,
+                    "type": {
+                        "id": 1,
+                        "name": "Tetap",
+                        "created_at": "2024-11-18T01:02:30.000000Z",
+                        "updated_at": "2024-11-18T01:02:30.000000Z"
                     }
-                ]
+                }
+            },
+            {
+                "id": 93,
+                "user_id": 36,
+                "time_check_in": "2024-11-25 10:24:57",
+                "time_check_out": null,
+                "time_total": "",
+                "status_check_in": 2,
+                "status_check_out": null,
+                "created_at": "2024-11-23T16:25:01.000000Z",
+                "updated_at": "2024-11-23T16:25:36.000000Z",
+                "user": {
+                    "id": 36,
+                    "name": "CANDRA",
+                    "email": "candra@gmail.com",
+                    "email_verified_at": null,
+                    "pin": "515210549",
+                    "shift_id": null,
+                    "created_at": "2024-11-23T16:25:01.000000Z",
+                    "updated_at": "2024-11-23T16:25:01.000000Z",
+                    "nip": null,
+                    "type_employee_id": 1,
+                    "company_id": null,
+                    "status": 1,
+                    "shift": null,
+                    "company": null,
+                    "type": {
+                        "id": 1,
+                        "name": "Tetap",
+                        "created_at": "2024-11-18T01:02:30.000000Z",
+                        "updated_at": "2024-11-18T01:02:30.000000Z"
+                    }
+                }
+            },
+            {
+                "id": 91,
+                "user_id": 36,
+                "time_check_in": "2024-11-23 23:24:57",
+                "time_check_out": "2024-11-23 23:25:32",
+                "time_total": "00:00:39",
+                "status_check_in": 2,
+                "status_check_out": 2,
+                "created_at": "2024-11-23T16:25:01.000000Z",
+                "updated_at": "2024-11-23T16:25:36.000000Z",
+                "user": {
+                    "id": 36,
+                    "name": "CANDRA",
+                    "email": "candra@gmail.com",
+                    "email_verified_at": null,
+                    "pin": "515210549",
+                    "shift_id": null,
+                    "created_at": "2024-11-23T16:25:01.000000Z",
+                    "updated_at": "2024-11-23T16:25:01.000000Z",
+                    "nip": null,
+                    "type_employee_id": 1,
+                    "company_id": null,
+                    "status": 1,
+                    "shift": null,
+                    "company": null,
+                    "type": {
+                        "id": 1,
+                        "name": "Tetap",
+                        "created_at": "2024-11-18T01:02:30.000000Z",
+                        "updated_at": "2024-11-18T01:02:30.000000Z"
+                    }
+                }
+            },
+            {
+                "id": 90,
+                "user_id": 35,
+                "time_check_in": "2024-11-23 23:24:40",
+                "time_check_out": "2024-11-23 23:25:19",
+                "time_total": "00:00:46",
+                "status_check_in": 2,
+                "status_check_out": 2,
+                "created_at": "2024-11-23T16:24:47.000000Z",
+                "updated_at": "2024-11-23T16:25:26.000000Z",
+                "user": {
+                    "id": 35,
+                    "name": "JO",
+                    "email": "jo@gmail.com",
+                    "email_verified_at": null,
+                    "pin": "1319022",
+                    "shift_id": null,
+                    "created_at": "2024-11-23T16:24:47.000000Z",
+                    "updated_at": "2024-11-23T16:24:47.000000Z",
+                    "nip": null,
+                    "type_employee_id": 1,
+                    "company_id": null,
+                    "status": 1,
+                    "shift": null,
+                    "company": null,
+                    "type": {
+                        "id": 1,
+                        "name": "Tetap",
+                        "created_at": "2024-11-18T01:02:30.000000Z",
+                        "updated_at": "2024-11-18T01:02:30.000000Z"
+                    }
+                }
             }
         ],
         "first_page_url": "http://127.0.0.1:8000/api/attendance/list?page=1",
@@ -431,8 +515,8 @@ Response
         "path": "http://127.0.0.1:8000/api/attendance/list",
         "per_page": 10,
         "prev_page_url": null,
-        "to": 1,
-        "total": 1
+        "to": 4,
+        "total": 4
     }
 }
 ```
@@ -459,17 +543,17 @@ Response
         "current_page": 1,
         "data": [
             {
-                "id": 1,
-                "name": "Admin",
-                "email": "admin@gmail.com",
+                "id": 37,
+                "name": "ANTO",
+                "email": "anto@gmail.com",
                 "email_verified_at": null,
-                "pin": "123456",
-                "shift_id": 2,
-                "created_at": "2024-11-11T05:48:44.000000Z",
-                "updated_at": "2024-11-11T05:48:44.000000Z",
+                "pin": "2021052",
+                "shift_id": null,
+                "created_at": "2024-11-23T16:25:11.000000Z",
+                "updated_at": "2024-11-23T16:25:11.000000Z",
                 "nip": null,
                 "type_employee_id": 1,
-                "company_id": 1,
+                "company_id": null,
                 "status": 1,
                 "type": {
                     "id": 1,
@@ -477,39 +561,21 @@ Response
                     "created_at": "2024-11-18T01:02:30.000000Z",
                     "updated_at": "2024-11-18T01:02:30.000000Z"
                 },
-                "company": {
-                    "id": 1,
-                    "name": "GAMATARA",
-                    "created_at": "2024-11-18T23:09:06.000000Z",
-                    "updated_at": "2024-11-18T23:09:06.000000Z"
-                },
-                "shift": [
-                    {
-                        "id": 2,
-                        "name": "Testing Shift",
-                        "early_check_in": "06:00:00",
-                        "check_in": "07:00:00",
-                        "late_check_in": "07:35:00",
-                        "early_check_out": "12:00:00",
-                        "check_out": "17:00:00",
-                        "late_check_out": "17:01:00",
-                        "created_at": "2024-11-13T21:37:58.000000Z",
-                        "updated_at": "2024-11-13T21:37:58.000000Z"
-                    }
-                ]
+                "company": null,
+                "shift": null
             },
             {
-                "id": 2,
-                "name": "Security",
-                "email": "security@gmail.com",
+                "id": 36,
+                "name": "CANDRA",
+                "email": "candra@gmail.com",
                 "email_verified_at": null,
-                "pin": "123456",
-                "shift_id": 2,
-                "created_at": "2024-11-11T05:48:44.000000Z",
-                "updated_at": "2024-11-11T05:48:44.000000Z",
+                "pin": "515210549",
+                "shift_id": null,
+                "created_at": "2024-11-23T16:25:01.000000Z",
+                "updated_at": "2024-11-23T16:25:01.000000Z",
                 "nip": null,
                 "type_employee_id": 1,
-                "company_id": 1,
+                "company_id": null,
                 "status": 1,
                 "type": {
                     "id": 1,
@@ -517,26 +583,30 @@ Response
                     "created_at": "2024-11-18T01:02:30.000000Z",
                     "updated_at": "2024-11-18T01:02:30.000000Z"
                 },
-                "company": {
+                "company": null,
+                "shift": null
+            },
+            {
+                "id": 35,
+                "name": "JO",
+                "email": "jo@gmail.com",
+                "email_verified_at": null,
+                "pin": "1319022",
+                "shift_id": null,
+                "created_at": "2024-11-23T16:24:47.000000Z",
+                "updated_at": "2024-11-23T16:24:47.000000Z",
+                "nip": null,
+                "type_employee_id": 1,
+                "company_id": null,
+                "status": 1,
+                "type": {
                     "id": 1,
-                    "name": "GAMATARA",
-                    "created_at": "2024-11-18T23:09:06.000000Z",
-                    "updated_at": "2024-11-18T23:09:06.000000Z"
+                    "name": "Tetap",
+                    "created_at": "2024-11-18T01:02:30.000000Z",
+                    "updated_at": "2024-11-18T01:02:30.000000Z"
                 },
-                "shift": [
-                    {
-                        "id": 2,
-                        "name": "Testing Shift",
-                        "early_check_in": "06:00:00",
-                        "check_in": "07:00:00",
-                        "late_check_in": "07:35:00",
-                        "early_check_out": "12:00:00",
-                        "check_out": "17:00:00",
-                        "late_check_out": "17:01:00",
-                        "created_at": "2024-11-13T21:37:58.000000Z",
-                        "updated_at": "2024-11-13T21:37:58.000000Z"
-                    }
-                ]
+                "company": null,
+                "shift": null
             },
             {
                 "id": 3,
@@ -546,7 +616,7 @@ Response
                 "pin": "123456",
                 "shift_id": 1,
                 "created_at": "2024-11-11T21:35:58.000000Z",
-                "updated_at": "2024-11-11T21:35:58.000000Z",
+                "updated_at": "2024-11-21T16:20:59.000000Z",
                 "nip": null,
                 "type_employee_id": 1,
                 "company_id": 1,
@@ -561,79 +631,38 @@ Response
                     "id": 1,
                     "name": "GAMATARA",
                     "created_at": "2024-11-18T23:09:06.000000Z",
-                    "updated_at": "2024-11-18T23:09:06.000000Z"
+                    "updated_at": "2024-11-18T23:09:06.000000Z",
+                    "status": 1
                 },
-                "shift": [
-                    {
-                        "id": 1,
-                        "name": "Shift Ketika",
-                        "early_check_in": "11:41:00",
-                        "check_in": "15:43:00",
-                        "late_check_in": "13:42:00",
-                        "early_check_out": "11:42:00",
-                        "check_out": "14:42:00",
-                        "late_check_out": "13:42:00",
-                        "created_at": "2024-11-11T21:39:48.000000Z",
-                        "updated_at": "2024-11-11T21:39:48.000000Z"
-                    }
-                ]
-            },
-            {
-                "id": 4,
-                "name": "Employee 1",
-                "email": "employee1@gmail.com",
-                "email_verified_at": null,
-                "pin": "123456",
-                "shift_id": 1,
-                "created_at": "2024-11-11T21:35:58.000000Z",
-                "updated_at": "2024-11-11T21:35:58.000000Z",
-                "nip": null,
-                "type_employee_id": 2,
-                "company_id": 1,
-                "status": 1,
-                "type": {
-                    "id": 2,
-                    "name": "Outsourcing",
-                    "created_at": "2024-11-18T01:02:30.000000Z",
-                    "updated_at": "2024-11-18T01:02:30.000000Z"
-                },
-                "company": {
+                "shift": {
                     "id": 1,
-                    "name": "GAMATARA",
-                    "created_at": "2024-11-18T23:09:06.000000Z",
-                    "updated_at": "2024-11-18T23:09:06.000000Z"
-                },
-                "shift": [
-                    {
-                        "id": 1,
-                        "name": "Shift Ketika",
-                        "early_check_in": "11:41:00",
-                        "check_in": "15:43:00",
-                        "late_check_in": "13:42:00",
-                        "early_check_out": "11:42:00",
-                        "check_out": "14:42:00",
-                        "late_check_out": "13:42:00",
-                        "created_at": "2024-11-11T21:39:48.000000Z",
-                        "updated_at": "2024-11-11T21:39:48.000000Z"
-                    }
-                ]
+                    "name": "Shift Ketika",
+                    "early_check_in": "11:41:00",
+                    "check_in": "15:43:00",
+                    "late_check_in": "13:42:00",
+                    "early_check_out": "11:42:00",
+                    "check_out": "14:42:00",
+                    "late_check_out": "13:42:00",
+                    "created_at": "2024-11-11T21:39:48.000000Z",
+                    "updated_at": "2024-11-11T21:39:48.000000Z"
+                }
             },
             {
-                "id": 5,
-                "name": "Employee 2",
-                "email": "employee2@gmail.com",
+                "id": 1,
+                "name": "Admin",
+                "email": "admin@gmail.com",
                 "email_verified_at": null,
                 "pin": "123456",
-                "shift_id": 1,
-                "created_at": "2024-11-11T21:35:58.000000Z",
-                "updated_at": "2024-11-11T21:35:58.000000Z",
+                "shift_id": 2,
+                "created_at": "2024-11-11T05:48:44.000000Z",
+                "updated_at": "2024-11-21T16:19:19.000000Z",
                 "nip": null,
-                "type_employee_id": 3,
+                "type_employee_id": 1,
                 "company_id": 1,
                 "status": 2,
                 "type": {
-                    "id": 3,
-                    "name": "Sub-Kon",
+                    "id": 1,
+                    "name": "Tetap",
                     "created_at": "2024-11-18T01:02:30.000000Z",
                     "updated_at": "2024-11-18T01:02:30.000000Z"
                 },
@@ -641,36 +670,35 @@ Response
                     "id": 1,
                     "name": "GAMATARA",
                     "created_at": "2024-11-18T23:09:06.000000Z",
-                    "updated_at": "2024-11-18T23:09:06.000000Z"
+                    "updated_at": "2024-11-18T23:09:06.000000Z",
+                    "status": 1
                 },
-                "shift": [
-                    {
-                        "id": 1,
-                        "name": "Shift Ketika",
-                        "early_check_in": "11:41:00",
-                        "check_in": "15:43:00",
-                        "late_check_in": "13:42:00",
-                        "early_check_out": "11:42:00",
-                        "check_out": "14:42:00",
-                        "late_check_out": "13:42:00",
-                        "created_at": "2024-11-11T21:39:48.000000Z",
-                        "updated_at": "2024-11-11T21:39:48.000000Z"
-                    }
-                ]
+                "shift": {
+                    "id": 2,
+                    "name": "Testing Shift",
+                    "early_check_in": "06:00:00",
+                    "check_in": "07:00:00",
+                    "late_check_in": "07:35:00",
+                    "early_check_out": "12:00:00",
+                    "check_out": "17:00:00",
+                    "late_check_out": "17:01:00",
+                    "created_at": "2024-11-13T21:37:58.000000Z",
+                    "updated_at": "2024-11-13T21:37:58.000000Z"
+                }
             },
             {
-                "id": 6,
-                "name": "Jojo",
-                "email": "jojo@gmail.com",
+                "id": 2,
+                "name": "Security",
+                "email": "security@gmail.com",
                 "email_verified_at": null,
-                "pin": "4",
-                "shift_id": 1,
-                "created_at": "2024-11-20T02:36:30.000000Z",
-                "updated_at": "2024-11-20T02:36:30.000000Z",
+                "pin": "123456",
+                "shift_id": 2,
+                "created_at": "2024-11-11T05:48:44.000000Z",
+                "updated_at": "2024-11-21T16:20:21.000000Z",
                 "nip": null,
                 "type_employee_id": 1,
                 "company_id": 1,
-                "status": 1,
+                "status": 2,
                 "type": {
                     "id": 1,
                     "name": "Tetap",
@@ -681,66 +709,21 @@ Response
                     "id": 1,
                     "name": "GAMATARA",
                     "created_at": "2024-11-18T23:09:06.000000Z",
-                    "updated_at": "2024-11-18T23:09:06.000000Z"
+                    "updated_at": "2024-11-18T23:09:06.000000Z",
+                    "status": 1
                 },
-                "shift": [
-                    {
-                        "id": 1,
-                        "name": "Shift Ketika",
-                        "early_check_in": "11:41:00",
-                        "check_in": "15:43:00",
-                        "late_check_in": "13:42:00",
-                        "early_check_out": "11:42:00",
-                        "check_out": "14:42:00",
-                        "late_check_out": "13:42:00",
-                        "created_at": "2024-11-11T21:39:48.000000Z",
-                        "updated_at": "2024-11-11T21:39:48.000000Z"
-                    }
-                ]
-            },
-            {
-                "id": 10,
-                "name": "Anto Wiranto",
-                "email": "antowiranto@gmail.com",
-                "email_verified_at": null,
-                "pin": "3",
-                "shift_id": null,
-                "created_at": "2024-11-21T01:05:34.000000Z",
-                "updated_at": "2024-11-21T01:05:34.000000Z",
-                "nip": null,
-                "type_employee_id": 1,
-                "company_id": null,
-                "status": 1,
-                "type": {
-                    "id": 1,
-                    "name": "Tetap",
-                    "created_at": "2024-11-18T01:02:30.000000Z",
-                    "updated_at": "2024-11-18T01:02:30.000000Z"
-                },
-                "company": null,
-                "shift": []
-            },
-            {
-                "id": 11,
-                "name": "khusnul",
-                "email": "khusnul@gmail.com",
-                "email_verified_at": null,
-                "pin": "2",
-                "shift_id": null,
-                "created_at": "2024-11-21T01:10:16.000000Z",
-                "updated_at": "2024-11-21T01:10:16.000000Z",
-                "nip": null,
-                "type_employee_id": 1,
-                "company_id": null,
-                "status": 1,
-                "type": {
-                    "id": 1,
-                    "name": "Tetap",
-                    "created_at": "2024-11-18T01:02:30.000000Z",
-                    "updated_at": "2024-11-18T01:02:30.000000Z"
-                },
-                "company": null,
-                "shift": []
+                "shift": {
+                    "id": 2,
+                    "name": "Testing Shift",
+                    "early_check_in": "06:00:00",
+                    "check_in": "07:00:00",
+                    "late_check_in": "07:35:00",
+                    "early_check_out": "12:00:00",
+                    "check_out": "17:00:00",
+                    "late_check_out": "17:01:00",
+                    "created_at": "2024-11-13T21:37:58.000000Z",
+                    "updated_at": "2024-11-13T21:37:58.000000Z"
+                }
             }
         ],
         "first_page_url": "http://127.0.0.1:8000/api/employee/list?page=1",
@@ -768,8 +751,8 @@ Response
         "path": "http://127.0.0.1:8000/api/employee/list",
         "per_page": 10,
         "prev_page_url": null,
-        "to": 8,
-        "total": 8
+        "to": 6,
+        "total": 6
     }
 }
 ```
@@ -822,18 +805,18 @@ Response
 {
     "success": true,
     "data": {
-        "id": 3,
-        "name": "Employee",
-        "email": "employee@gmail.com",
+        "id": 1,
+        "name": "Admin",
+        "email": "admin@gmail.com",
         "email_verified_at": null,
         "pin": "123456",
-        "shift_id": 1,
-        "created_at": "2024-11-11T21:35:58.000000Z",
-        "updated_at": "2024-11-11T21:35:58.000000Z",
+        "shift_id": 2,
+        "created_at": "2024-11-11T05:48:44.000000Z",
+        "updated_at": "2024-11-21T16:19:19.000000Z",
         "nip": null,
         "type_employee_id": 1,
         "company_id": 1,
-        "status": 1,
+        "status": 2,
         "type": {
             "id": 1,
             "name": "Tetap",
@@ -844,33 +827,32 @@ Response
             "id": 1,
             "name": "GAMATARA",
             "created_at": "2024-11-18T23:09:06.000000Z",
-            "updated_at": "2024-11-18T23:09:06.000000Z"
+            "updated_at": "2024-11-18T23:09:06.000000Z",
+            "status": 1
         },
-        "shift": [
-            {
-                "id": 1,
-                "name": "Shift Ketika",
-                "early_check_in": "11:41:00",
-                "check_in": "15:43:00",
-                "late_check_in": "13:42:00",
-                "early_check_out": "11:42:00",
-                "check_out": "14:42:00",
-                "late_check_out": "13:42:00",
-                "created_at": "2024-11-11T21:39:48.000000Z",
-                "updated_at": "2024-11-11T21:39:48.000000Z"
-            }
-        ],
+        "shift": {
+            "id": 2,
+            "name": "Testing Shift",
+            "early_check_in": "06:00:00",
+            "check_in": "07:00:00",
+            "late_check_in": "07:35:00",
+            "early_check_out": "12:00:00",
+            "check_out": "17:00:00",
+            "late_check_out": "17:01:00",
+            "created_at": "2024-11-13T21:37:58.000000Z",
+            "updated_at": "2024-11-13T21:37:58.000000Z"
+        },
         "roles": [
             {
-                "id": 11,
-                "name": "Employee",
+                "id": 9,
+                "name": "Super Admin",
                 "guard_name": "api",
-                "created_at": "2024-11-19T23:51:13.000000Z",
-                "updated_at": "2024-11-19T23:51:13.000000Z",
+                "created_at": "2024-11-19T23:44:17.000000Z",
+                "updated_at": "2024-11-20T07:57:57.000000Z",
                 "pivot": {
                     "model_type": "App\\Models\\User",
-                    "model_id": 3,
-                    "role_id": 11
+                    "model_id": 1,
+                    "role_id": 9
                 }
             }
         ]
@@ -983,6 +965,7 @@ Response
     ]
 }
 ```
+
 ### EMPLOYEE UPDATE SHIFT
 
 PUT
@@ -1650,5 +1633,442 @@ Response
         "to": 1,
         "total": 1
     }
+}
+```
+
+### GUEST LIST
+
+GET
+/guest/list
+
+Params
+```
+{
+    'page_size' : 10,
+    'page' : 1,
+    'keyword' : ''
+}
+```
+
+Response
+```
+{
+    "success": true,
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 10,
+                "name": "Lesmana",
+                "phone_number": "081234567890",
+                "created_at": "2024-11-25T05:28:50.000000Z",
+                "updated_at": "2024-11-25T05:28:50.000000Z",
+                "nik": "123456"
+            },
+            {
+                "id": 6,
+                "name": "ANTO ANTO",
+                "phone_number": "0813838383",
+                "created_at": "2024-11-22T08:42:12.000000Z",
+                "updated_at": "2024-11-22T08:42:12.000000Z",
+                "nik": null
+            },
+            {
+                "id": 5,
+                "name": "ANTO ANTO",
+                "phone_number": "028282828",
+                "created_at": "2024-11-22T08:17:33.000000Z",
+                "updated_at": "2024-11-22T08:17:33.000000Z",
+                "nik": null
+            },
+            {
+                "id": 4,
+                "name": "TEST",
+                "phone_number": "92228282822",
+                "created_at": "2024-11-22T08:16:35.000000Z",
+                "updated_at": "2024-11-22T08:16:35.000000Z",
+                "nik": null
+            },
+            {
+                "id": 3,
+                "name": "Anto Wiranto",
+                "phone_number": "08282828282",
+                "created_at": "2024-11-22T08:10:44.000000Z",
+                "updated_at": "2024-11-22T08:10:44.000000Z",
+                "nik": null
+            },
+            {
+                "id": 1,
+                "name": "Candra",
+                "phone_number": "081234567890",
+                "created_at": "2024-11-19T22:06:44.000000Z",
+                "updated_at": "2024-11-19T22:06:44.000000Z",
+                "nik": null
+            },
+            {
+                "id": 2,
+                "name": "Adut",
+                "phone_number": "081234567890",
+                "created_at": "2024-11-19T22:06:44.000000Z",
+                "updated_at": "2024-11-19T22:06:44.000000Z",
+                "nik": null
+            }
+        ],
+        "first_page_url": "http://127.0.0.1:8000/api/guest/list?page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://127.0.0.1:8000/api/guest/list?page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://127.0.0.1:8000/api/guest/list?page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://127.0.0.1:8000/api/guest/list",
+        "per_page": 10,
+        "prev_page_url": null,
+        "to": 7,
+        "total": 7
+    }
+}
+```
+
+### ATTENDANCE GUEST LIST
+
+GET 
+/attendance_guest/list
+
+Params
+```
+{
+    'page_size' : 10,
+    'page' : 1,
+    'keyword' : '',
+    'start_date' : 2024-11-20',
+    'end_date' : 2024-11-25
+}
+```
+
+Response
+```
+{
+    "success": true,
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 8,
+                "guest_id": 10,
+                "institution": "GOJEK",
+                "time_check_in": "2024-11-25 12:28:51",
+                "time_check_out": "2024-11-25 12:35:02",
+                "need": "Test Absen Guest",
+                "created_at": "2024-11-25T05:28:51.000000Z",
+                "updated_at": "2024-11-25T05:35:03.000000Z",
+                "type_vehicle": "Mobil",
+                "no_police": "B4716UR",
+                "total_guest": 2,
+                "duration": "12:41:13",
+                "guest": {
+                    "id": 10,
+                    "name": "Lesmana",
+                    "phone_number": "081234567890",
+                    "created_at": "2024-11-25T05:28:50.000000Z",
+                    "updated_at": "2024-11-25T05:28:50.000000Z",
+                    "nik": "123456"
+                }
+            },
+            {
+                "id": 7,
+                "guest_id": 6,
+                "institution": "GOJEK",
+                "time_check_in": "2024-11-22 15:42:13",
+                "time_check_out": "2024-11-25 12:31:41",
+                "need": "Untuk meeting",
+                "created_at": "2024-11-22T08:42:13.000000Z",
+                "updated_at": "2024-11-25T05:31:42.000000Z",
+                "type_vehicle": null,
+                "no_police": null,
+                "total_guest": null,
+                "duration": "68:49:28",
+                "guest": {
+                    "id": 6,
+                    "name": "ANTO ANTO",
+                    "phone_number": "0813838383",
+                    "created_at": "2024-11-22T08:42:12.000000Z",
+                    "updated_at": "2024-11-22T08:42:12.000000Z",
+                    "nik": null
+                }
+            },
+            {
+                "id": 6,
+                "guest_id": 5,
+                "institution": "JIKA YA",
+                "time_check_in": "2024-11-22 15:17:34",
+                "time_check_out": "2024-11-22 15:17:44",
+                "need": "Untuk meeting",
+                "created_at": "2024-11-22T08:17:34.000000Z",
+                "updated_at": "2024-11-22T08:17:44.000000Z",
+                "type_vehicle": null,
+                "no_police": null,
+                "total_guest": null,
+                "duration": null,
+                "guest": {
+                    "id": 5,
+                    "name": "ANTO ANTO",
+                    "phone_number": "028282828",
+                    "created_at": "2024-11-22T08:17:33.000000Z",
+                    "updated_at": "2024-11-22T08:17:33.000000Z",
+                    "nik": null
+                }
+            },
+            {
+                "id": 5,
+                "guest_id": 4,
+                "institution": null,
+                "time_check_in": "2024-11-22 15:16:36",
+                "time_check_out": "2024-11-22 15:21:19",
+                "need": "EETING",
+                "created_at": "2024-11-22T08:16:36.000000Z",
+                "updated_at": "2024-11-22T08:21:19.000000Z",
+                "type_vehicle": null,
+                "no_police": null,
+                "total_guest": null,
+                "duration": null,
+                "guest": {
+                    "id": 4,
+                    "name": "TEST",
+                    "phone_number": "92228282822",
+                    "created_at": "2024-11-22T08:16:35.000000Z",
+                    "updated_at": "2024-11-22T08:16:35.000000Z",
+                    "nik": null
+                }
+            },
+            {
+                "id": 4,
+                "guest_id": 3,
+                "institution": null,
+                "time_check_in": "2024-11-22 15:10:46",
+                "time_check_out": "2024-11-22 15:21:23",
+                "need": "Untuk meeting",
+                "created_at": "2024-11-22T08:10:46.000000Z",
+                "updated_at": "2024-11-22T08:21:23.000000Z",
+                "type_vehicle": null,
+                "no_police": null,
+                "total_guest": null,
+                "duration": null,
+                "guest": {
+                    "id": 3,
+                    "name": "Anto Wiranto",
+                    "phone_number": "08282828282",
+                    "created_at": "2024-11-22T08:10:44.000000Z",
+                    "updated_at": "2024-11-22T08:10:44.000000Z",
+                    "nik": null
+                }
+            },
+            {
+                "id": 1,
+                "guest_id": 1,
+                "institution": "Corporation",
+                "time_check_in": "2024-11-20 10:07:39",
+                "time_check_out": "2024-11-20 14:07:39",
+                "need": "Meeting",
+                "created_at": "2024-11-19T22:07:39.000000Z",
+                "updated_at": "2024-11-19T22:07:39.000000Z",
+                "type_vehicle": "Mobil",
+                "no_police": "B1234UV",
+                "total_guest": 2,
+                "duration": "04:00:00",
+                "guest": {
+                    "id": 1,
+                    "name": "Candra",
+                    "phone_number": "081234567890",
+                    "created_at": "2024-11-19T22:06:44.000000Z",
+                    "updated_at": "2024-11-19T22:06:44.000000Z",
+                    "nik": null
+                }
+            },
+            {
+                "id": 2,
+                "guest_id": 2,
+                "institution": "Corporation",
+                "time_check_in": "2024-11-20 10:07:39",
+                "time_check_out": "2024-11-20 15:07:39",
+                "need": "Meeting",
+                "created_at": "2024-11-19T22:07:39.000000Z",
+                "updated_at": "2024-11-19T22:07:39.000000Z",
+                "type_vehicle": "Mobil",
+                "no_police": "B1234UV",
+                "total_guest": 2,
+                "duration": "05:00:00",
+                "guest": {
+                    "id": 2,
+                    "name": "Adut",
+                    "phone_number": "081234567890",
+                    "created_at": "2024-11-19T22:06:44.000000Z",
+                    "updated_at": "2024-11-19T22:06:44.000000Z",
+                    "nik": null
+                }
+            },
+            {
+                "id": 3,
+                "guest_id": 2,
+                "institution": "Corporation",
+                "time_check_in": "2023-12-20 10:07:39",
+                "time_check_out": "2023-12-20 15:07:39",
+                "need": "Meeting",
+                "created_at": "2023-11-19T22:07:39.000000Z",
+                "updated_at": "2023-11-19T22:07:39.000000Z",
+                "type_vehicle": "Mobil",
+                "no_police": "B1234UV",
+                "total_guest": 2,
+                "duration": "05:00:00",
+                "guest": {
+                    "id": 2,
+                    "name": "Adut",
+                    "phone_number": "081234567890",
+                    "created_at": "2024-11-19T22:06:44.000000Z",
+                    "updated_at": "2024-11-19T22:06:44.000000Z",
+                    "nik": null
+                }
+            }
+        ],
+        "first_page_url": "http://127.0.0.1:8000/api/attendance_guest/list?page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://127.0.0.1:8000/api/attendance_guest/list?page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://127.0.0.1:8000/api/attendance_guest/list?page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://127.0.0.1:8000/api/attendance_guest/list",
+        "per_page": 10,
+        "prev_page_url": null,
+        "to": 8,
+        "total": 8
+    }
+}
+```
+
+### CHECK IN ATTENDANCE GUEST
+
+POST
+/attendance_guest/store
+
+Body
+```
+{
+    'guest_id' : 2,
+    'nik' : 123456,
+    'name' : 'Candra',
+    'phone_number' : '081234567890',
+    'institution' : 'GOJEK',
+    'type_vehicle' : 'Mobil',
+    'no_police' : 'B4716UR',
+    'total_guest' : 2,
+    'need' : 'Test Absen Guest'
+}
+```
+
+Note: Jika guest sudah ada maka bisa pakai id guest
+
+Response
+```
+{
+    "success": true,
+    "message": "Success Added Guest And Attendance",
+    "data": {
+        "guest": {
+            "nik": 123456,
+            "name": "Lesmana",
+            "phone_number": "081234567890",
+            "updated_at": "2024-11-25T05:28:50.000000Z",
+            "created_at": "2024-11-25T05:28:50.000000Z",
+            "id": 10
+        },
+        "attendace": {
+            "guest_id": 10,
+            "institution": "GOJEK",
+            "time_check_in": "2024-11-25 12:28:51",
+            "need": "Test Absen Guest",
+            "type_vehicle": "Mobil",
+            "no_police": "B4716UR",
+            "total_guest": 2,
+            "updated_at": "2024-11-25T05:28:51.000000Z",
+            "created_at": "2024-11-25T05:28:51.000000Z",
+            "id": 8
+        }
+    }
+}
+```
+
+### CHECK OUT ATTENDANCE GUEST
+
+PUT
+/attendance_guest/update/{id}
+
+Response
+```
+{
+    "success": true,
+    "message": "Success Update Attendance",
+    "data": {
+        "id": 8,
+        "guest_id": 10,
+        "institution": "GOJEK",
+        "time_check_in": "2024-11-25 12:28:51",
+        "time_check_out": "2024-11-25 12:35:02",
+        "need": "Test Absen Guest",
+        "created_at": "2024-11-25T05:28:51.000000Z",
+        "updated_at": "2024-11-25T05:35:03.000000Z",
+        "type_vehicle": "Mobil",
+        "no_police": "B4716UR",
+        "total_guest": 2,
+        "duration": "12:41:13"
+    }
+}
+```
+
+### GET NOTIFICATION
+
+GET
+/notif
+
+Response
+```
+{
+    "success": true,
+    "data": [
+        {
+            "user_id": 36,
+            "message": "Hi CANDRA, Sudah Saatnya Absen Keluar"
+        }
+    ]
 }
 ```

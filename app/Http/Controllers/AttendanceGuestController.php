@@ -15,7 +15,19 @@ class AttendanceGuestController extends Controller
 {
     public function list(Request $request)
     {
-        $att_guest = Helper::pagination(AttendanceGuest::with('guest')->orderBy('created_at', 'desc'), $request, ['guest.name', 'date', 'time_check_in', 'time_check_out']);
+        $start_date = $request->input('start_date') ?? null;
+        $end_date = $request->input('end_date') ?? null;
+
+        $data = AttendanceGuest::with('guest')->orderBy('created_at', 'desc');
+        
+        if ($start_date && $end_date) {
+            $data->where(function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('time_check_in', [$start_date, $end_date])
+                      ->orWhereBetween('time_check_out', [$start_date, $end_date]);
+            });
+        }
+
+        $att_guest = Helper::pagination($data, $request, ['guest.name']);
 
         return response()->json([
             'success' => true,
@@ -49,8 +61,9 @@ class AttendanceGuestController extends Controller
         }else{
             try{
                 $guest = Guest::create([
+                    'nik' => $request->nik,
                     'name' => $request->name,
-                    'phone_number' => $request->phone_number,
+                    'phone_number' => $request->phone_number
                 ]);
 
             }catch(\Exception $e){
@@ -113,14 +126,16 @@ class AttendanceGuestController extends Controller
             }
 
             $timeCheckIn = Carbon::parse($att_guest->time_check_in);
-
-            $timeNow = Carbon::now();
-
-            $diff = $timeCheckIn->diff($timeNow);
+            
+            $diffInSeconds = $timeCheckIn->diffInSeconds(Carbon::now());
+            $hours = floor($diffInSeconds / 3600);
+            $minutes = floor(($diffInSeconds % 3600) / 60);
+            $seconds = $diffInSeconds % 60;
+            $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
 
             $att_guest->update([
                 'time_check_out' => Carbon::now()->format('Y-m-d H:i:s'),
-                'duration' => $diff
+                'duration' => Carbon::parse($diff)->format('H:i:s')
             ]);
 
             return response()->json([
@@ -144,7 +159,8 @@ class AttendanceGuestController extends Controller
        
     }
 
-    public function report(Request $request){
+    public function report(Request $request)
+    {
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
         $keyword = strtolower($request->input('keyword', ''));

@@ -68,17 +68,17 @@ class User extends Authenticatable implements JWTSubject
 
     public function attendance()
     {
-        return $this->belongsTo(Attendance::class, 'id', 'user_id');
+        return $this->hasMany(Attendance::class, 'user_id', 'id');
     }
     
     public function type()
     {
-        return $this->hasOne(TypeEmployee::class, 'id', 'type_employee_id');
+        return $this->belongsTo(TypeEmployee::class, 'type_employee_id', 'id');
     }
 
     public function company()
     {
-        return $this->hasOne(Company::class, 'id', 'company_id');
+        return $this->belongsTo(Company::class, 'company_id', 'id');
     }
 
     public function att_log()
@@ -88,6 +88,11 @@ class User extends Authenticatable implements JWTSubject
 
     public function shift()
     {
-        return $this->hasMany(Shift::class, 'id', 'shift_id');
+        return $this->belongsTo(Shift::class, 'shift_id', 'id');
+    }
+
+    public function notification()
+    {
+        return $this->belongsTo(Notification::class, 'user_id', 'id');
     }
 }

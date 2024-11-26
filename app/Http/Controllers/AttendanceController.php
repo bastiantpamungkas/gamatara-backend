@@ -223,10 +223,12 @@ class AttendanceController extends Controller
                 $att_in = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->first();          
 
                 $timeCheckIn = Carbon::parse($att_in->time_check_in);
-
-                $timeNow = Carbon::now();
-
-                $diff = $timeCheckIn->diff($timeNow);
+                
+                $diffInSeconds = $timeCheckIn->diffInSeconds(Carbon::now());
+                $hours = floor($diffInSeconds / 3600);
+                $minutes = floor(($diffInSeconds % 3600) / 60);
+                $seconds = $diffInSeconds % 60;
+                $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
 
                 $attendance = Attendance::where('user_id', $attender->id)
                     ->whereNull('time_check_out')

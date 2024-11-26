@@ -11,6 +11,6 @@ class Guest extends Model
 
     public function attendance_guest()
     {
-        return $this->belongsTo(AttendanceGuest::class, 'id', 'guest_id');
+        return $this->hasMany(AttendanceGuest::class, 'guest_id', 'id');
     }
 }
