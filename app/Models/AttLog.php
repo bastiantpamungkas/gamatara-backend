@@ -6,11 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AttLog extends Model
 {
+    protected $connection = 'mysql';
     protected $table = 'att_logs';
     protected $guarded = ['id'];
-
-    public function user()
-    {
-        return $this->hasMany(User::class, 'pin', 'pin');
-    }
 }

@@ -6,6 +6,7 @@ use Ably\AblyRest;
 use Ably\Http;
 use App\Helpers\Helper;
 use App\Models\Attendance;
+use App\Models\AttLog;
 use App\Models\MachineSetting;
 use App\Models\Shift;
 use App\Models\User;
@@ -210,6 +211,7 @@ class AttendanceController extends Controller
                     'time_check_in'   => $check_time,
                     'status_check_in' => $status_in,
                 ]);
+
             } else {
                 $check_present = Attendance::where('user_id', $attender->id)->whereDate('time_check_out', Carbon::now()->format('Y-m-d'));
 
@@ -261,6 +263,7 @@ class AttendanceController extends Controller
         ];
 
         $this->publishToAbly('gate', $data);
+        $this->post_batik($request->all(), $st_inorout->status == "IN" ? 1 : 2);
 
         return response()->json([
             'success'    => true,
@@ -283,4 +286,16 @@ class AttendanceController extends Controller
         $channel->publish('message', $data);
     }
 
+    private function post_batik($data, $status){
+        AttLog::create([
+            'sn' => $data->dev_sn,
+            'scan_date' => Carbon::now(),
+            'pin' => $data->pin,
+            'verifymode' => 0,
+            'inoutmode' => $status,
+            'reserved' => 0,
+            'work_code' => 0,
+            'att_id' => 0,
+        ]);
+    }
 }
