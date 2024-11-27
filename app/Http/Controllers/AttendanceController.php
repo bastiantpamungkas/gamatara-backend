@@ -263,7 +263,7 @@ class AttendanceController extends Controller
         ];
 
         $this->publishToAbly('gate', $data);
-        $this->post_batik($request->all(), $st_inorout->status == "IN" ? 1 : 2);
+        $this->post_batik($request, $st_inorout->status == "IN" ? 1 : 2);
 
         return response()->json([
             'success'    => true,
