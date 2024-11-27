@@ -8,6 +8,7 @@ use App\Helpers\Helper;
 use App\Models\Attendance;
 use App\Models\AttLog;
 use App\Models\MachineSetting;
+use App\Models\Setting;
 use App\Models\Shift;
 use App\Models\User;
 use Carbon\Carbon;
@@ -263,7 +264,12 @@ class AttendanceController extends Controller
         ];
 
         $this->publishToAbly('gate', $data);
-        $this->post_batik($request, $st_inorout->status == "IN" ? 1 : 2);
+
+        $sti = Setting::find(1);
+
+        if($sti->status == "ON"){
+            $this->post_batik($request, $st_inorout->status == "IN" ? 1 : 2);
+        }
 
         return response()->json([
             'success'    => true,

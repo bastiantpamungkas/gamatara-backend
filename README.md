@@ -2072,3 +2072,16 @@ Response
     ]
 }
 ```
+
+### CHANGE ON OFF SETTING
+
+POST
+/setting_on_of
+
+Response
+```
+{
+    "success": true,
+    "message": "Button Active"
+}
+```

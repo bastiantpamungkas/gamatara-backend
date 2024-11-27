@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RolePermissionController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TypeEmployeeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('type_employee', [TypeEmployeeController::class, 'list']);
 
     Route::get('notif', [NotificationController::class, 'get_notif']);
+
+    Route::post('setting_on_of', [SettingController::class, 'update']);
 
     Route::prefix('dashboard')->group(function () {
         Route::get('counts', [DashboardController::class, 'counts']);
