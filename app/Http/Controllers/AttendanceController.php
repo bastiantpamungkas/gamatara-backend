@@ -355,7 +355,9 @@ class AttendanceController extends Controller
         $sti = Setting::find(1);
 
         if($sti->status == "ON"){
-            $this->post_batik($request, $st_inorout->status == "IN" ? 1 : 2);
+            if($attender->type_employee_id == 1){
+                $this->post_batik($request, $st_inorout->status == "IN" ? 1 : 2);
+            }
         }
 
         return response()->json([
