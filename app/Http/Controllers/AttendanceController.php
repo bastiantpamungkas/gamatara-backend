@@ -221,7 +221,7 @@ class AttendanceController extends Controller
                     if ($attLog) {
                         $attLog->update([
                             'time_check_in'  => $check_time,
-                            'time_total' => $diff
+                            'total_time' => $diff
                         ]);
                     }
 
