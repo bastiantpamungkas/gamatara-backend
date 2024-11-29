@@ -13,7 +13,7 @@ class AttLogController extends Controller
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ?? null;
 
-        $att_logs = AttLog::with('user');
+        $att_logs = AttLog::with(['user.type', 'user.company']);
 
         if ($start_date && $end_date) {
             $att_logs->where(function ($query) use ($start_date, $end_date) {

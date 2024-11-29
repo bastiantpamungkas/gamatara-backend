@@ -104,22 +104,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('update/{id}', [CompanyController::class, 'update']);
     });
     
-
     // Router lainnya
+    
 });
 
-// Ably 
-Route::get('/attendance_realtime', function (Request $request) {
-    $channelName = 'attendance-gamatara-channel';
-    $attendanceController = new AttendanceController();
-    $data = $attendanceController->list($request)->getData();
-
-    broadcast(new AttendanceRealtimeEvent( $channelName, $data ));
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Data berhasil dibroadcast',
-        'data' => $data
-    ]);
-
-})->middleware('throttle:60,1');
