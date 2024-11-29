@@ -185,6 +185,7 @@ class AttendanceController extends Controller
                     'name'             => $request->name,
                     'email'            => strtolower(str_replace(" ", "", $request->name)) . '@gmail.com',
                     'pin'              => $request->pin,
+                    'nip'              => $request->pin,
                     'type_employee_id' => $request->dept_code ?? 0,
                 ]);
             } catch (Exception $e) {
