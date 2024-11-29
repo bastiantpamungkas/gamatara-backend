@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('att_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('pin');
-            $table->timestamp('scan');
-            $table->string('verify');
-            $table->integer('status_scan');
+            $table->integer('user_id');
+            $table->dateTime('time_check_out');
+            $table->dateTime('time_check_in');
+            $table->string('time_total');
             $table->timestamps();
         });
     }

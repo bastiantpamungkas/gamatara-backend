@@ -3,6 +3,7 @@
 use App\Events\AttendanceRealtimeEvent;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceGuestController;
+use App\Http\Controllers\AttLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TypeEmployeeController;
+use App\Models\AttLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +38,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('notif', [NotificationController::class, 'get_notif']);
 
     Route::post('setting_on_of', [SettingController::class, 'update']);
+
+    Route::get('gate_access_log', [AttLogController::class, 'list']);
 
     Route::prefix('dashboard')->group(function () {
         Route::get('counts', [DashboardController::class, 'counts']);

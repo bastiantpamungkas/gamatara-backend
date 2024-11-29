@@ -71,6 +71,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Attendance::class, 'user_id', 'id');
     }
     
+    public function att_log()
+    {
+        return $this->hasMany(AttLog::class, 'user_id', 'id');
+    }
+    
     public function type()
     {
         return $this->belongsTo(TypeEmployee::class, 'type_employee_id', 'id');
@@ -79,11 +84,6 @@ class User extends Authenticatable implements JWTSubject
     public function company()
     {
         return $this->belongsTo(Company::class, 'company_id', 'id');
-    }
-
-    public function att_log()
-    {
-        return $this->belongsTo(AttLog::class, 'pin', 'pin');
     }
 
     public function shift()

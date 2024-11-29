@@ -2085,3 +2085,82 @@ Response
     "message": "Button Active"
 }
 ```
+
+### LIST GATE ACCESS LOG
+
+GET
+/gate_access_log
+
+
+Params
+```
+{
+    'page_size' : 10,
+    'page' : 1,
+    'keyword' : '',
+    'start_date' : 2024-11-20,
+    'end_date' : 2024-11-30
+}
+```
+
+Response
+```
+{
+    "success": true,
+    "data": {
+        "current_page": 1,
+        "data": [
+            {
+                "id": 1,
+                "user_id": 35,
+                "time_check_out": "2024-11-29 12:05:00",
+                "time_check_in": null,
+                "total_time": null,
+                "created_at": "2024-11-29T05:41:01.000000Z",
+                "updated_at": "2024-11-29T05:41:01.000000Z",
+                "user": {
+                    "id": 35,
+                    "name": "JO",
+                    "email": "jo@gmail.com",
+                    "email_verified_at": null,
+                    "pin": "1319022",
+                    "shift_id": null,
+                    "created_at": "2024-11-23T16:24:47.000000Z",
+                    "updated_at": "2024-11-23T16:24:47.000000Z",
+                    "nip": null,
+                    "type_employee_id": 1,
+                    "company_id": null,
+                    "status": 1
+                }
+            }
+        ],
+        "first_page_url": "http://127.0.0.1:8000/api/gate_access_log?page=1",
+        "from": 1,
+        "last_page": 1,
+        "last_page_url": "http://127.0.0.1:8000/api/gate_access_log?page=1",
+        "links": [
+            {
+                "url": null,
+                "label": "&laquo; Previous",
+                "active": false
+            },
+            {
+                "url": "http://127.0.0.1:8000/api/gate_access_log?page=1",
+                "label": "1",
+                "active": true
+            },
+            {
+                "url": null,
+                "label": "Next &raquo;",
+                "active": false
+            }
+        ],
+        "next_page_url": null,
+        "path": "http://127.0.0.1:8000/api/gate_access_log",
+        "per_page": 10,
+        "prev_page_url": null,
+        "to": 1,
+        "total": 1
+    }
+}
+```
