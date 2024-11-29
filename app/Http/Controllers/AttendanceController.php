@@ -214,7 +214,7 @@ class AttendanceController extends Controller
                     $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
 
                     $attLog = AttLog::where('user_id', $attender->id)
-                        ->whereNull('time_check_in')
+                        ->whereNull('time_check_out')
                         ->latest()
                         ->first();
 
@@ -222,6 +222,11 @@ class AttendanceController extends Controller
                         $attLog->update([
                             'time_check_in'  => $check_time,
                             'total_time' => $diff
+                        ]);
+                    }else{
+                        AttLog::create([
+                            'user_id'         => $attender->id,
+                            'time_check_in'  => $check_time
                         ]);
                     }
 
@@ -240,10 +245,32 @@ class AttendanceController extends Controller
                 $check_present = Attendance::where('user_id', $attender->id)->whereDate('time_check_out', Carbon::now()->format('Y-m-d'));
 
                 if ($check_present->exists()) {
-                    AttLog::create([
-                        'user_id'         => $attender->id,
-                        'time_check_out'   => $check_time,
-                    ]);
+                    $att_out = AttLog::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->first();          
+
+                    $timeCheckOut = Carbon::parse($att_out->time_check_out);
+                    
+                    $diffInSeconds = $timeCheckOut->diffInSeconds(Carbon::now());
+                    $hours = floor($diffInSeconds / 3600);
+                    $minutes = floor(($diffInSeconds % 3600) / 60);
+                    $seconds = $diffInSeconds % 60;
+                    $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+
+                    $attLog = AttLog::where('user_id', $attender->id)
+                        ->whereNull('time_check_in')
+                        ->latest()
+                        ->first();
+
+                    if ($attLog) {
+                        $attLog->update([
+                            'time_check_in'  => $check_time,
+                            'total_time' => $diff
+                        ]);
+                    }else{
+                        AttLog::create([
+                            'user_id'         => $attender->id,
+                            'time_check_in'  => $check_time
+                        ]);
+                    }
                     
                     return response()->json([
                         'status' => true,
