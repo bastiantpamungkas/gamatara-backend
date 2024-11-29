@@ -27,7 +27,7 @@ class AttendanceController extends Controller
         $status_checkout = $request->input('status_checkout') ?? null;
         $company = $request->input('company') ?? null;
         $start_date = $request->input('start_date') ?? null;
-        $end_date = $request->input('end_date') ?? null;
+        $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
 
         $att = Attendance::with(['user.shift', 'user.company', 'user.type'])->when($shift, function ($query) use ($shift) {
                 $query->whereHas('user.shift', function ($q) use ($shift) {

@@ -16,7 +16,7 @@ class AttendanceGuestController extends Controller
     public function list(Request $request)
     {
         $start_date = $request->input('start_date') ?? null;
-        $end_date = $request->input('end_date') ?? null;
+        $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
 
         $data = AttendanceGuest::with('guest')->orderBy('created_at', 'desc');
         
