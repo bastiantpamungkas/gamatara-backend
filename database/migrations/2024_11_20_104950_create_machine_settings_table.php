@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('sn_machine');
             $table->string('machine_name');
+            $table->string('status');
             $table->timestamps();
         });
     }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->bigInteger('user_id');
             $table->dateTime('time_check_in');
             $table->datetime('time_check_out')->nullable();
-            $table->time('time_total')->nullable();
+            $table->time('duration')->nullable();
             $table->integer('status_check_in')->nullable();
             $table->integer('status_check_out')->nullable();
             $table->timestamps();

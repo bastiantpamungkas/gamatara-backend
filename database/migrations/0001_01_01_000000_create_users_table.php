@@ -17,11 +17,11 @@ return new class extends Migration
             $table->string('nip')->nullable();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->string('pin')->nullable();
-            $table->bigInteger('shift_id');
-            $table->bigInteger('type_employee_id');
-            $table->bigInteger('company_id');
+            $table->bigInteger('shift_id')->nullable();
+            $table->bigInteger('type_employee_id')->nullable();
+            $table->bigInteger('company_id')->nullable();
             $table->integer('status')->default(1);
             $table->rememberToken();
             $table->timestamps();
