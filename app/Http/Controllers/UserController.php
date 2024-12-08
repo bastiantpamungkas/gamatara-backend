@@ -191,4 +191,126 @@ class UserController extends Controller
             'data' => User::whereIn('id', $ids)->get()
         ],200);
     }
+
+    public function list_absent(Request $request)
+    {
+        $type_employee = $request->input('type_employee') ?? null;
+        
+        $absent = User::with('type', 'company', 'shift');
+        if ($type_employee) {
+            $absent->where('type_employee_id', $type_employee);
+        }
+        $absent->whereDoesntHave('attendance', function ($query) {
+            $start_date = Date("Y-m-d");
+            $end_date = Date("Y-m-d", strtotime("+1 day"));
+
+            $query->whereBetween('time_check_out', [$start_date, $end_date])
+                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        });
+
+        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ], 200);
+    }
+
+    public function list_late(Request $request)
+    {
+        $type_employee = $request->input('type_employee') ?? null;
+        
+        $absent = User::with('type', 'company', 'shift', 'attendance');
+        if ($type_employee) {
+            $absent->where('type_employee_id', $type_employee);
+        }
+        $absent->whereHas('attendance', function ($query) {
+            $start_date = Date("Y-m-d");
+            $end_date = Date("Y-m-d", strtotime("+1 day"));
+
+            $query->where('status_check_in', 3);
+            $query->whereBetween('time_check_out', [$start_date, $end_date])
+                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        });
+
+        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ], 200);
+    }
+
+    public function list_early_checkout(Request $request)
+    {
+        $type_employee = $request->input('type_employee') ?? null;
+        
+        $absent = User::with('type', 'company', 'shift', 'attendance');
+        if ($type_employee) {
+            $absent->where('type_employee_id', $type_employee);
+        }
+        $absent->whereHas('attendance', function ($query) {
+            $start_date = Date("Y-m-d");
+            $end_date = Date("Y-m-d", strtotime("+1 day"));
+
+            $query->where('status_check_out', 1);
+            $query->whereBetween('time_check_out', [$start_date, $end_date])
+                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        });
+
+        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ], 200);
+    }
+    
+    public function list_in_gate(Request $request)
+    {
+        $type_employee = $request->input('type_employee') ?? null;
+        
+        $absent = User::with('type', 'company', 'shift', 'attendance');
+        if ($type_employee) {
+            $absent->where('type_employee_id', $type_employee);
+        }
+        $absent->whereHas('attendance', function ($query) {
+            $start_date = Date("Y-m-d");
+            $end_date = Date("Y-m-d", strtotime("+1 day"));
+
+            $query->whereBetween('time_check_in', [$start_date, $end_date]);
+            $query->whereNull('time_check_out');
+        });
+
+        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ], 200);
+    }
+
+    public function list_out_gate(Request $request)
+    {
+        $type_employee = $request->input('type_employee') ?? null;
+        
+        $absent = User::with('type', 'company', 'shift', 'attendance');
+        if ($type_employee) {
+            $absent->where('type_employee_id', $type_employee);
+        }
+        $absent->whereHas('attendance', function ($query) {
+            $start_date = Date("Y-m-d");
+            $end_date = Date("Y-m-d", strtotime("+1 day"));
+
+            $query->whereBetween('time_check_out', [$start_date, $end_date])
+                ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        });
+
+        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $user
+        ], 200);
+    }
 }

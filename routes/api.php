@@ -40,6 +40,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('setting_on_of', [SettingController::class, 'update']);
 
     Route::get('gate_access_log', [AttLogController::class, 'list']);
+    Route::get('gate_log_card', [AttLogController::class, 'list_log_card']);
 
     Route::prefix('dashboard')->group(function () {
         Route::get('counts', [DashboardController::class, 'counts']);
@@ -50,6 +51,11 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::prefix('employee')->group(function () {
         Route::get('list', [UserController::class, 'list']);
+        Route::get('absent', [UserController::class, 'list_absent']);
+        Route::get('late', [UserController::class, 'list_late']);
+        Route::get('early_checkout', [UserController::class, 'list_early_checkout']);
+        Route::get('in_gate', [UserController::class, 'list_in_gate']);
+        Route::get('out_gate', [UserController::class, 'list_out_gate']);
         Route::post('store', [UserController::class, 'store']);
         Route::get('detail/{id}', [UserController::class, 'detail']);
         Route::put('update/{id}', [UserController::class, 'update']);

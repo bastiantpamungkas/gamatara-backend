@@ -13,6 +13,7 @@ class AttLogController extends Controller
     public function list(Request $request){
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
+        $type_employee = $request->input('type_employee') ?? null;
 
         $att_logs = AttLog::with(['user.type', 'user.company']);
 
@@ -20,6 +21,11 @@ class AttLogController extends Controller
             $att_logs->where(function ($query) use ($start_date, $end_date) {
                 $query->whereBetween('time_check_out', [$start_date, $end_date])
                       ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+            });
+        }
+        if ($type_employee) { 
+            $att_logs->whereHas('user', function ($query) use ($type_employee) {
+                $query->where('type_employee_id', $type_employee);
             });
         }
         
@@ -31,6 +37,61 @@ class AttLogController extends Controller
         return response()->json([
             'success' => true,
             'data' => $data
+        ], 200);
+    }
+
+    public function list_log_card(Request $request){
+        $start_date = $request->input('start_date') ?? null;
+        $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
+
+        $att_logs = AttLog::with(['user.type', 'user.company']);
+
+        if ($start_date && $end_date) {
+            $att_logs->where(function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('time_check_out', [$start_date, $end_date])
+                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+            });
+        }
+        $att_logs->orderBy('created_at', 'desc');
+        $result = $att_logs->get();
+        
+        $data = Helper::pagination($att_logs->orderBy('created_at', 'desc'), $request, [
+            'user.name',
+            'user.nip'
+        ]);
+
+        $log_cards = collect();
+        if ($data) {
+            foreach($data as $row) {
+                $log_card_in = $log_card_out = $row;
+                $log_card_in->status = 'IN';
+                if ($row->time_check_in) {
+                    $log_cards->add([
+                        "name" => ($row->user) ? $row->user->name : null,
+                        "nip" => ($row->user) ? $row->user->nip : null,
+                        "time_check_in" => $row->time_check_in,
+                        "time_check_out" => $row->time_check_out,
+                        "time" => $row->time_check_in,
+                        "status" => 'IN',
+                    ]);
+                }
+                if ($row->time_check_out) {
+                    $log_cards->add([
+                        "name" => ($row->user) ? $row->user->name : null,
+                        "nip" => ($row->user) ? $row->user->nip : null,
+                        "time_check_in" => $row->time_check_in,
+                        "time_check_out" => $row->time_check_out,
+                        "time" => $row->time_check_out,
+                        "status" => 'OUT',
+                    ]);
+                }
+            }
+        }
+        $data->setCollection($log_cards);
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
         ], 200);
     }
 }
