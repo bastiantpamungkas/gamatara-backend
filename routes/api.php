@@ -51,6 +51,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::prefix('employee')->group(function () {
         Route::get('list', [UserController::class, 'list']);
+        Route::get('present', [UserController::class, 'list_present']);
         Route::get('absent', [UserController::class, 'list_absent']);
         Route::get('late', [UserController::class, 'list_late']);
         Route::get('early_checkout', [UserController::class, 'list_early_checkout']);

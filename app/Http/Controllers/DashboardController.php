@@ -21,6 +21,10 @@ class DashboardController extends Controller
             $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
         })->count();
 
+        $emp_absent = User::whereDoesntHave('attendance', function($q) {
+            $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
+        })->count();
+
         $emp_late_in = User::whereHas('attendance', function($q) {
             $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->where('status_check_in', 3);
         })->count();
@@ -51,6 +55,7 @@ class DashboardController extends Controller
         return response()->json([
             'employee_count' =>  $emp ?? 0,
             'employee_present' => $emp_present ?? 0,
+            'employee_absent' => $emp_absent ?? 0,
             'employee_late_in' => $emp_late_in ?? 0,
             'employee_early_out' => $emp_early_out ?? 0,
             'people_in' => $people_in ?? 0,
