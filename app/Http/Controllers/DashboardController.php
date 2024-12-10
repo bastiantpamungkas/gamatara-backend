@@ -29,8 +29,8 @@ class DashboardController extends Controller
             $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->where('status_check_in', 3);
         })->count();
         
-        $emp_early_out = User::whereDoesntHave('attendance', function($q) {
-            $q->where('time_check_out', Carbon::now()->format('Y-m-d'))->where('status_check_out', 2);
+        $emp_early_out = User::whereHas('attendance', function($q) {
+            $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->where('status_check_out', 2);
         })->count();
 
         $employee_in = User::whereHas('att_log', function($q) {
@@ -52,14 +52,162 @@ class DashboardController extends Controller
         $people_in = intval($employee_in) + intval($guest_in);
         $people_out = intval($employee_out) + intval($guest_out);
 
+        $type = TypeEmployee::with('user')->get();
+        if ($type) {
+            $type = $type->map(function($item, $key) {
+                $item->total = $item->user->count('id');
+                return [
+                    "id" => $item->id,
+                    "name" => $item->name,
+                    "total" => $item->total,
+                ];
+            });
+        }
+        $employee_count_data = $type;
+
+        $users = User::selectRaw('type_employee_id, count(type_employee_id) as total')->with('type', 'attendance')->whereHas('attendance',function($q) {
+            $start_date = Date("Y-m-d");
+            $end_date = Date("Y-m-d", strtotime("+1 day"));
+
+            $q->whereBetween('time_check_out', [$start_date, $end_date])
+            ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        })->orderBy('type_employee_id')->groupBy('type_employee_id')->get();
+
+        $type = TypeEmployee::get();
+        if ($type) {
+            $type = $type->map(function($item, $key) use ($users) {
+                $item->total = 0;
+                foreach ($users as $row) {
+                    if ($row->type_employee_id == $item->id) {
+                        $item->total = $row->total;
+                    }
+                }
+                return $item;
+            });
+        }
+        $employee_present_data = $type;
+
+        $users = User::selectRaw('type_employee_id, count(type_employee_id) as total')->with('type', 'attendance')->whereDoesntHave('attendance',function($q) {
+            $start_date = Date("Y-m-d");
+            $end_date = Date("Y-m-d", strtotime("+1 day"));
+
+            $q->whereBetween('time_check_out', [$start_date, $end_date])
+            ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        })->orderBy('type_employee_id')->groupBy('type_employee_id')->get();
+
+        $type = TypeEmployee::get();
+        if ($type) {
+            $type = $type->map(function($item, $key) use ($users) {
+                $item->total = 0;
+                foreach ($users as $row) {
+                    if ($row->type_employee_id == $item->id) {
+                        $item->total = $row->total;
+                    }
+                }
+                return $item;
+            });
+        }
+        $employee_absent_data = $type;
+
+        $users = User::selectRaw('type_employee_id, count(type_employee_id) as total')->with('type', 'attendance')->whereHas('attendance',function($q) {
+            $start_date = Date("Y-m-d");
+            $end_date = Date("Y-m-d", strtotime("+1 day"));
+
+            $q->where('status_check_in', 3);
+            $q->whereBetween('time_check_out', [$start_date, $end_date])
+                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        })->orderBy('type_employee_id')->groupBy('type_employee_id')->get();
+
+        $type = TypeEmployee::get();
+        if ($type) {
+            $type = $type->map(function($item, $key) use ($users) {
+                $item->total = 0;
+                foreach ($users as $row) {
+                    if ($row->type_employee_id == $item->id) {
+                        $item->total = $row->total;
+                    }
+                }
+                return $item;
+            });
+        }
+        $employee_late_in_data = $type;
+
+        $users = User::selectRaw('type_employee_id, count(type_employee_id) as total')->with('type', 'attendance')->whereHas('attendance',function($q) {
+            $start_date = Date("Y-m-d");
+            $end_date = Date("Y-m-d", strtotime("+1 day"));
+            
+            $q->where('status_check_out', 2);
+            $q->whereBetween('time_check_out', [$start_date, $end_date])
+                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        })->orderBy('type_employee_id')->groupBy('type_employee_id')->get();
+
+        $type = TypeEmployee::get();
+        if ($type) {
+            $type = $type->map(function($item, $key) use ($users) {
+                $item->total = 0;
+                foreach ($users as $row) {
+                    if ($row->type_employee_id == $item->id) {
+                        $item->total = $row->total;
+                    }
+                }
+                return $item;
+            });
+        }
+        $employee_early_out_data = $type;
+
+        $users = User::selectRaw('type_employee_id, count(type_employee_id) as total')->with('type', 'att_log')->whereHas('att_log',function($q) {
+            $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))
+                      ->whereNotNull('time_check_in');
+        })->orderBy('type_employee_id')->groupBy('type_employee_id')->get();
+
+        $type = TypeEmployee::get();
+        if ($type) {
+            $type = $type->map(function($item, $key) use ($users) {
+                $item->total = 0;
+                foreach ($users as $row) {
+                    if ($row->type_employee_id == $item->id) {
+                        $item->total = $row->total;
+                    }
+                }
+                return $item;
+            });
+        }
+        $people_in_data = $type;
+
+        $users = User::selectRaw('type_employee_id, count(type_employee_id) as total')->with('type', 'att_log')->whereHas('att_log',function($q) {
+            $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))
+                      ->whereNotNull('time_check_out');
+        })->orderBy('type_employee_id')->groupBy('type_employee_id')->get();
+
+        $type = TypeEmployee::get();
+        if ($type) {
+            $type = $type->map(function($item, $key) use ($users) {
+                $item->total = 0;
+                foreach ($users as $row) {
+                    if ($row->type_employee_id == $item->id) {
+                        $item->total = $row->total;
+                    }
+                }
+                return $item;
+            });
+        }
+        $people_out_data = $type;
+
         return response()->json([
             'employee_count' =>  $emp ?? 0,
+            'employee_count_data' => $employee_count_data ?? [],
             'employee_present' => $emp_present ?? 0,
+            'employee_present_data' => $employee_present_data ?? [],
             'employee_absent' => $emp_absent ?? 0,
+            'employee_absent_data' => $employee_absent_data ?? [],
             'employee_late_in' => $emp_late_in ?? 0,
+            'employee_late_in_data' => $employee_late_in_data ?? [],
             'employee_early_out' => $emp_early_out ?? 0,
+            'employee_early_out_data' => $employee_early_out_data ?? [],
             'people_in' => $people_in ?? 0,
-            'people_out' => $people_out ?? 0
+            'people_in_data' => $people_in_data ?? [],
+            'people_out' => $people_out ?? 0,
+            'people_out_data' => $people_out_data ?? [],
         ], 200);
     }
 

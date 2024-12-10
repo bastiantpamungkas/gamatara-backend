@@ -38,6 +38,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('notif', [NotificationController::class, 'get_notif']);
 
     Route::post('setting_on_of', [SettingController::class, 'update']);
+    Route::post('setting_total_hari_kerja', [SettingController::class, 'update_hari_kerja']);
 
     Route::get('gate_access_log', [AttLogController::class, 'list']);
     Route::get('gate_log_card', [AttLogController::class, 'list_log_card']);
@@ -58,6 +59,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('in_gate', [UserController::class, 'list_in_gate']);
         Route::get('out_gate', [UserController::class, 'list_out_gate']);
         Route::post('store', [UserController::class, 'store']);
+        Route::post('sync', [UserController::class, 'sync']);
         Route::get('detail/{id}', [UserController::class, 'detail']);
         Route::put('update/{id}', [UserController::class, 'update']);
         Route::put('update_status', [UserController::class, 'update_status']);
