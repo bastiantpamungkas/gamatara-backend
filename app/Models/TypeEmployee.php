@@ -11,6 +11,6 @@ class TypeEmployee extends Model
 
     public function user()
     {
-        return $this->hasOne(User::class, 'type_employee_id', 'id');
+        return $this->hasMany(User::class, 'type_employee_id', 'id');
     }
 }
