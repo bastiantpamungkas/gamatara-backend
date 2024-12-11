@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Str;
 use App\Models\PersPerson;
 use Illuminate\Http\Request;
+use App\Jobs\JobPersPerson;
 
 class UserController extends Controller
 {
@@ -70,35 +71,36 @@ class UserController extends Controller
     public function sync(Request $request)
     {
         try {
-            // sync data ke mesin absensi
+            // sync data persperson dari mesin absensi
+            JobPersPerson::dispatch();
 
-            $person = PersPerson::limit(5)->get();
-            // $person = PersPerson::get();
-            if ($person) {
-                foreach ($person as $row) {
-                    $user = User::where('nip', $row->pin)->first();
-                    if ($user) {
-                        $user->name = $row->name;
-                        $user->pin = $row->pin;
-                        $user->nip = $row->pin;
-                        $user->email = Str::slug($row->name) . $row->pin . '@gmail.com';
-                        $user->password = '1235678';
-                        $user->type_employee_id = 1;
-                        $user->save();
-                    } else {
-                        User::create(
-                            [
-                                'name' => $row->name,
-                                'pin' => $row->pin,
-                                'nip' => $row->pin,
-                                'email' => Str::slug($row->name) . $row->pin . '@gmail.com',
-                                'password' => '12345678',
-                                'type_employee_id' => 1,
-                            ]
-                        );
-                    }
-                };
-            }
+            // $person = PersPerson::limit(5)->get();
+            // // $person = PersPerson::get();
+            // if ($person) {
+            //     foreach ($person as $row) {
+            //         $user = User::where('nip', $row->pin)->first();
+            //         if ($user) {
+            //             $user->name = $row->name;
+            //             $user->pin = $row->pin;
+            //             $user->nip = $row->pin;
+            //             $user->email = Str::slug($row->name) . $row->pin . '@gmail.com';
+            //             $user->password = '1235678';
+            //             $user->type_employee_id = 1;
+            //             $user->save();
+            //         } else {
+            //             User::create(
+            //                 [
+            //                     'name' => $row->name,
+            //                     'pin' => $row->pin,
+            //                     'nip' => $row->pin,
+            //                     'email' => Str::slug($row->name) . $row->pin . '@gmail.com',
+            //                     'password' => '12345678',
+            //                     'type_employee_id' => 1,
+            //                 ]
+            //             );
+            //         }
+            //     };
+            // }
 
             return response()->json([
                 'success' => true,
