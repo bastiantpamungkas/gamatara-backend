@@ -37,6 +37,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::get('notif', [NotificationController::class, 'get_notif']);
 
+    Route::post('status_settings', [SettingController::class, 'status_settings']);
     Route::post('setting_on_of', [SettingController::class, 'update']);
     Route::post('setting_total_hari_kerja', [SettingController::class, 'update_hari_kerja']);
 
