@@ -9,6 +9,15 @@ use App\Helpers\Helper;
 
 class SettingController extends Controller
 {
+    public function status_settings(){
+        $sti = Setting::find(1);
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Button " . ($sti->status == 'ON' ? 'Active' : 'Non-Active'),
+        ], 200);
+    }
+
     public function update(){
         $sti = Setting::find(1);
 
