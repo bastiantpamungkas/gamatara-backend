@@ -15,6 +15,9 @@ class SettingController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Button " . ($sti->status == 'ON' ? 'Active' : 'Non-Active'),
+            'data' => [
+                'is_active' => $sti->status == 'ON',
+            ]
         ], 200);
     }
 
