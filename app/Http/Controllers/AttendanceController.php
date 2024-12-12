@@ -17,6 +17,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Types\Relations\Car;
+use App\Jobs\JobPostBatik;
 
 class AttendanceController extends Controller
 {
@@ -27,31 +28,31 @@ class AttendanceController extends Controller
         $status_checkout = $request->input('status_checkout') ?? null;
         $company = $request->input('company') ?? null;
         $start_date = $request->input('start_date') ?? null;
-        $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
+        $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay() : null;
 
         $att = Attendance::with(['user.shift', 'user.company', 'user.type'])->when($shift, function ($query) use ($shift) {
-                $query->whereHas('user.shift', function ($q) use ($shift) {
-                    $q->where('id', $shift);
-                });
-            })
+            $query->whereHas('user.shift', function ($q) use ($shift) {
+                $q->where('id', $shift);
+            });
+        })
             ->when($company, function ($query) use ($company) {
                 $query->whereHas('user.company', function ($q) use ($company) {
                     $q->where('id', $company);
                 });
             });
 
-        if($status_checkin){
+        if ($status_checkin) {
             $att->where('status_check_in', $status_checkin);
         }
-        
-        if($status_checkout){
+
+        if ($status_checkout) {
             $att->where('status_check_out', $status_checkout);
         }
 
         if ($start_date && $end_date) {
             $att->where(function ($query) use ($start_date, $end_date) {
                 $query->whereBetween('time_check_in', [$start_date, $end_date])
-                      ->orWhereBetween('time_check_out', [$start_date, $end_date]);
+                    ->orWhereBetween('time_check_out', [$start_date, $end_date]);
             });
         }
 
@@ -98,7 +99,8 @@ class AttendanceController extends Controller
         ], 200);
     }
 
-    public function report(Request $request){
+    public function report(Request $request)
+    {
         $pageSize = $request->input('page_size', 10);
         $page = $request->input('page', 1);
         $keyword = strtolower($request->input('keyword', ''));
@@ -114,7 +116,7 @@ class AttendanceController extends Controller
                     if ($month) {
                         $yearMonth = Carbon::parse($month);
                         $q->whereYear('time_check_in', $yearMonth->year)
-                        ->whereMonth('time_check_in', $yearMonth->month);
+                            ->whereMonth('time_check_in', $yearMonth->month);
                     }
                 },
                 'attendance as ontime_attendance' => function ($q) use ($month) {
@@ -122,7 +124,7 @@ class AttendanceController extends Controller
                     if ($month) {
                         $yearMonth = Carbon::parse($month);
                         $q->whereYear('time_check_in', $yearMonth->year)
-                        ->whereMonth('time_check_in', $yearMonth->month);
+                            ->whereMonth('time_check_in', $yearMonth->month);
                     }
                 },
                 'attendance as late_attendance' => function ($q) use ($month) {
@@ -130,7 +132,7 @@ class AttendanceController extends Controller
                     if ($month) {
                         $yearMonth = Carbon::parse($month);
                         $q->whereYear('time_check_in', $yearMonth->year)
-                        ->whereMonth('time_check_in', $yearMonth->month);
+                            ->whereMonth('time_check_in', $yearMonth->month);
                     }
                 },
                 'attendance as early_checkout' => function ($q) use ($month) {
@@ -138,13 +140,13 @@ class AttendanceController extends Controller
                     if ($month) {
                         $yearMonth = Carbon::parse($month);
                         $q->whereYear('time_check_in', $yearMonth->year)
-                        ->whereMonth('time_check_in', $yearMonth->month);
+                            ->whereMonth('time_check_in', $yearMonth->month);
                     }
                 },
             ])
             ->when($keyword, function ($q) use ($keyword) {
                 $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . $keyword . '%'])
-                ->orWhereRaw("LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+                    ->orWhereRaw("LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
             })
             ->when($status, function ($q) use ($status) {
                 $q->where('status', $status);
@@ -173,7 +175,7 @@ class AttendanceController extends Controller
     {
         $check_time = str_replace("T", " ", $request->event_time);
         $attender = User::with('shift')->where('pin', $request->pin)->first();
-        $st_inorout = MachineSetting::where('sn_machine', $request->dev_sn)->first();   
+        $st_inorout = MachineSetting::where('sn_machine', $request->dev_sn)->first();
 
         $status = function ($time, $shift, $early, $normal) {
             return $time < $shift->$early ? 1 : ($time < $shift->$normal ? 2 : 3);
@@ -193,19 +195,19 @@ class AttendanceController extends Controller
                 $check_present = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::parse($check_time)->format('Y-m-d'));
 
                 if ($check_present->exists()) {
-                    $att_out = AttLog::where('user_id', $attender->id)->whereDate('time_check_out', Carbon::parse($check_time)->format('Y-m-d'))->latest()->first(); 
+                    $att_out = AttLog::where('user_id', $attender->id)->whereDate('time_check_out', Carbon::parse($check_time)->format('Y-m-d'))->latest()->first();
 
                     // AttLog
                     $this->attLog(
-                        $attender->id, 
-                        $att_out->time_check_out, 
-                        $check_time, 
+                        $attender->id,
+                        $att_out->time_check_out,
+                        $check_time,
                         $st_inorout->status
                     );
 
                     return response()->json([
                         'status' => true,
-                        'message' => 'Selamat datang ' . $attender->name, 
+                        'message' => 'Selamat datang ' . $attender->name,
                     ], 200);
                 }
 
@@ -214,9 +216,8 @@ class AttendanceController extends Controller
                     'time_check_in'   => $check_time,
                     'status_check_in' => $status_in,
                 ]);
-
             } else {
-                $att_in = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::parse($check_time)->format('Y-m-d'))->latest()->first();  
+                $att_in = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::parse($check_time)->format('Y-m-d'))->latest()->first();
 
                 $timeCheckIn = Carbon::parse($att_in->time_check_in);
                 $diffInSeconds = $timeCheckIn->diffInSeconds($check_time);
@@ -224,36 +225,35 @@ class AttendanceController extends Controller
                 $minutes = floor(($diffInSeconds % 3600) / 60);
                 $seconds = $diffInSeconds % 60;
                 $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
-                
-                if(!$attender->shift){
+
+                if (!$attender->shift) {
                     $att_in->update([
                         'time_check_out'  => $check_time,
-                        'status_check_out'=> $status_out,
+                        'status_check_out' => $status_out,
                         'duration' => $diff
-                    ]);      
+                    ]);
                 }
 
-                if($attender->shift && $attender->shift->early_check_out <= Carbon::parse($check_time)->format('H:i:s')){
+                if ($attender->shift && $attender->shift->early_check_out <= Carbon::parse($check_time)->format('H:i:s')) {
                     $att_in->update([
                         'time_check_out'  => $check_time,
-                        'status_check_out'=> $status_out,
+                        'status_check_out' => $status_out,
                         'duration' => $diff
                     ]);
                 }
 
                 $this->attLog(
-                    $attender->id, 
-                    $att_in->time_check_out, 
-                    $check_time, 
+                    $attender->id,
+                    $att_in->time_check_out,
+                    $check_time,
                     $st_inorout->status
                 );
-                
             }
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
-            ],422);
+            ], 422);
         }
 
         $greeting = $st_inorout && $st_inorout->status == "IN" ? "Selamat Datang" : "Sampai Jumpa";
@@ -271,9 +271,11 @@ class AttendanceController extends Controller
 
         $sti = Setting::find(1);
 
-        if($sti->status == "ON"){
-            if($attender->type_employee_id == 1){
-                $this->post_batik($request, $st_inorout->status == "IN" ? 1 : 2);
+        if ($sti->status == "ON") {
+            if ($attender->type_employee_id == 1 || $attender->type_employee_id == 2) {
+                // masuk ke queue job
+                // $this->post_batik($request, $st_inorout->status == "IN" ? 1 : 2);
+                JobPostBatik::dispatch([$request, $st_inorout->status == "IN" ? 1 : 2]);
             }
         }
 
@@ -305,28 +307,28 @@ class AttendanceController extends Controller
 
     private function attLog($attenderId, $time_start, $check_time, $status)
     {
-        $timeStartCheck = Carbon::parse($time_start);      
+        $timeStartCheck = Carbon::parse($time_start);
         $diffInSeconds = $timeStartCheck->diffInSeconds(Carbon::parse($check_time));
         $hours = floor($diffInSeconds / 3600);
         $minutes = floor(($diffInSeconds % 3600) / 60);
         $seconds = $diffInSeconds % 60;
         $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
 
-        if($status == "IN"){
+        if ($status == "IN") {
             $attLog = AttLog::where('user_id', $attenderId)->whereNotNull('time_check_out')->latest()->first();
-            
-            if($attLog) {
+
+            if ($attLog) {
                 $attLog->update([
                     'time_check_in'  => $check_time,
                     'duration' => $diff
                 ]);
-            }else{
+            } else {
                 AttLog::create([
                     'user_id'         => $attenderId,
                     'time_check_in'  => $check_time
                 ]);
             }
-        }else{
+        } else {
             AttLog::create([
                 'user_id'         => $attenderId,
                 'time_check_out'  => $check_time
@@ -343,7 +345,7 @@ class AttendanceController extends Controller
 
     private function post_batik($data, $status)
     {
-        try{
+        try {
             AttLogBatik::create([
                 'sn' => $data->dev_sn,
                 'scan_date' => Carbon::parse(str_replace("T", " ", $data->event_time))->format('Y-m-d H:i:s'),
@@ -354,7 +356,7 @@ class AttendanceController extends Controller
                 'work_code' => 0,
                 'att_id' => 0,
             ]);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()

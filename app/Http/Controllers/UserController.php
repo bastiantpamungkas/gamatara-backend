@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
 use App\Models\User;
+use Illuminate\Support\Str;
+use App\Models\PersPerson;
 use Illuminate\Http\Request;
+use App\Jobs\JobPersPerson;
 
 class UserController extends Controller
 {
@@ -68,7 +71,36 @@ class UserController extends Controller
     public function sync(Request $request)
     {
         try {
-            // sync data ke mesin absensi
+            // sync data persperson dari mesin absensi
+            JobPersPerson::dispatch();
+
+            // $person = PersPerson::limit(5)->get();
+            // // $person = PersPerson::get();
+            // if ($person) {
+            //     foreach ($person as $row) {
+            //         $user = User::where('nip', $row->pin)->first();
+            //         if ($user) {
+            //             $user->name = $row->name;
+            //             $user->pin = $row->pin;
+            //             $user->nip = $row->pin;
+            //             $user->email = Str::slug($row->name) . $row->pin . '@gmail.com';
+            //             $user->password = '1235678';
+            //             $user->type_employee_id = 1;
+            //             $user->save();
+            //         } else {
+            //             User::create(
+            //                 [
+            //                     'name' => $row->name,
+            //                     'pin' => $row->pin,
+            //                     'nip' => $row->pin,
+            //                     'email' => Str::slug($row->name) . $row->pin . '@gmail.com',
+            //                     'password' => '12345678',
+            //                     'type_employee_id' => 1,
+            //                 ]
+            //             );
+            //         }
+            //     };
+            // }
 
             return response()->json([
                 'success' => true,
@@ -179,7 +211,8 @@ class UserController extends Controller
         }
     }
 
-    public function update_status(Request $request){
+    public function update_status(Request $request)
+    {
         $ids = $request->input('ids');
         $status = $request->input('status', 1);
 
@@ -199,10 +232,11 @@ class UserController extends Controller
             'success' => true,
             'message' => 'Success Update Status Employee',
             'data' => User::whereIn('id', $ids)->get()
-        ],200);
+        ], 200);
     }
-    
-    public function update_shift(Request $request){
+
+    public function update_shift(Request $request)
+    {
         $ids = $request->input('ids');
         $shift_id = $request->input('shift_id', 1);
 
@@ -222,13 +256,13 @@ class UserController extends Controller
             'success' => true,
             'message' => 'Success Update Shift Employee',
             'data' => User::whereIn('id', $ids)->get()
-        ],200);
+        ], 200);
     }
 
     public function list_absent(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
-        
+
         $absent = User::with('type', 'company', 'shift');
         if ($type_employee) {
             $absent->where('type_employee_id', $type_employee);
@@ -238,7 +272,7 @@ class UserController extends Controller
             $end_date = Date("Y-m-d", strtotime("+1 day"));
 
             $query->whereBetween('time_check_out', [$start_date, $end_date])
-                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+                ->orWhereBetween('time_check_in', [$start_date, $end_date]);
         });
 
         $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
@@ -252,7 +286,7 @@ class UserController extends Controller
     public function list_present(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
-        
+
         $absent = User::with('type', 'company', 'shift');
         if ($type_employee) {
             $absent->where('type_employee_id', $type_employee);
@@ -262,7 +296,7 @@ class UserController extends Controller
             $end_date = Date("Y-m-d", strtotime("+1 day"));
 
             $query->whereBetween('time_check_out', [$start_date, $end_date])
-                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+                ->orWhereBetween('time_check_in', [$start_date, $end_date]);
         });
 
         $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
@@ -276,7 +310,7 @@ class UserController extends Controller
     public function list_late(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
-        
+
         $absent = User::with('type', 'company', 'shift', 'attendance');
         if ($type_employee) {
             $absent->where('type_employee_id', $type_employee);
@@ -287,7 +321,7 @@ class UserController extends Controller
 
             $query->where('status_check_in', 3);
             $query->whereBetween('time_check_out', [$start_date, $end_date])
-                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+                ->orWhereBetween('time_check_in', [$start_date, $end_date]);
         });
 
         $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
@@ -301,7 +335,7 @@ class UserController extends Controller
     public function list_early_checkout(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
-        
+
         $absent = User::with('type', 'company', 'shift', 'attendance');
         if ($type_employee) {
             $absent->where('type_employee_id', $type_employee);
@@ -312,7 +346,7 @@ class UserController extends Controller
 
             $query->where('status_check_out', 2);
             $query->whereBetween('time_check_out', [$start_date, $end_date])
-                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+                ->orWhereBetween('time_check_in', [$start_date, $end_date]);
         });
 
         $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
@@ -322,11 +356,11 @@ class UserController extends Controller
             'data' => $user
         ], 200);
     }
-    
+
     public function list_in_gate(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
-        
+
         $absent = User::with('type', 'company', 'shift', 'attendance');
         if ($type_employee) {
             $absent->where('type_employee_id', $type_employee);
@@ -350,7 +384,7 @@ class UserController extends Controller
     public function list_out_gate(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
-        
+
         $absent = User::with('type', 'company', 'shift', 'attendance');
         if ($type_employee) {
             $absent->where('type_employee_id', $type_employee);
