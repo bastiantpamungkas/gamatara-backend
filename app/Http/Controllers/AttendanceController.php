@@ -179,14 +179,14 @@ class AttendanceController extends Controller
             return $time < $shift->$early ? 1 : ($time < $shift->$normal ? 2 : 3);
         };
 
+        if (!$attender) {
+            $attender = $this->userCreate($request);
+        }
+
         $shift = $attender->shift_id ? Shift::find($attender->shift_id) : null;
         $time = Carbon::parse($check_time)->format('H:i:s');
         $status_in = $shift ? $status($time, $shift, 'early_check_in', 'check_in') : 2;
         $status_out = $shift ? $status($time, $shift, 'early_check_out', 'check_out') : 2;
-
-        if (!$attender) {
-            $attender = $this->userCreate($request);
-        }
 
         try {
             if ($st_inorout && $st_inorout->status == "IN") {
