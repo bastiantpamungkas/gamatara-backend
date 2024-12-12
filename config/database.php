@@ -95,7 +95,22 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
-        
+
+        'pgsql_ngrok' => [
+            'driver' => 'pgsql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST_NGROK', '127.0.0.1'),
+            'port' => env('DB_PORT_NGROK', '5432'),
+            'database' => env('DB_DATABASE_NGROK', 'db_gamatara'),
+            'username' => env('DB_USERNAME_NGROK', 'postgres'),
+            'password' => env('DB_PASSWORD_NGROK', 'postgres'),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'publicSS',
+            'sslmode' => 'prefer',
+        ],
+
         // 'pgsql' => [
         //     'driver' => 'pgsql',
         //     'url' => env('DB_URL'),
