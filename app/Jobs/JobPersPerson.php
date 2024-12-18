@@ -8,6 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 use App\Models\PersPerson;
 use App\Models\User;
 use Carbon\Carbon;
@@ -54,7 +55,7 @@ class JobPersPerson implements ShouldQueue
                     $user->pin = $row->pin;
                     $user->nip = $row->pin;
                     $user->email = Str::slug($row->name) . $row->pin . '@gmail.com';
-                    $user->password = '1235678';
+                    $user->password = Hash::make('1235678');
                     $user->type_employee_id = 1;
                     $user->save();
                 } else {
@@ -64,7 +65,7 @@ class JobPersPerson implements ShouldQueue
                             'pin' => $row->pin,
                             'nip' => $row->pin,
                             'email' => Str::slug($row->name) . $row->pin . '@gmail.com',
-                            'password' => '12345678',
+                            'password' => Hash::make('1235678'),
                             'type_employee_id' => 1,
                         ]
                     );

@@ -9,6 +9,23 @@ use App\Helpers\Helper;
 
 class SettingController extends Controller
 {
+    public function detail($id)
+    {
+        $setting = Setting::find($id);
+
+        if (!$setting) {
+            return response()->json([
+                'success' => false,
+                'message' => "Setting Not Found",
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $setting
+        ], 200);
+    }
+    
     public function status_settings(){
         $sti = Setting::find(1);
         

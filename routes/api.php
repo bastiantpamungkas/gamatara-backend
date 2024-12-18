@@ -32,11 +32,13 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware(['auth:api'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('change_password', [AuthController::class, 'change_password']);
 
     Route::get('type_employee', [TypeEmployeeController::class, 'list']);
 
     Route::get('notif', [NotificationController::class, 'get_notif']);
 
+    Route::get('setting/detail/{id}', [SettingController::class, 'detail']);
     Route::get('status_settings', [SettingController::class, 'status_settings']);
     Route::post('setting_on_of', [SettingController::class, 'update']);
     Route::post('setting_total_hari_kerja', [SettingController::class, 'update_hari_kerja']);
@@ -103,8 +105,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::prefix('roles')->group(function () {
         Route::get('list', [RolePermissionController::class, 'role']);
         Route::get('permissions', [RolePermissionController::class, 'permission']);
+        Route::get('permissions_category', [RolePermissionController::class, 'permission_category']);
+        Route::post('store', [RolePermissionController::class, 'store']);
         Route::get('edit-role/{id}', [RolePermissionController::class, 'editRole']);
-        Route::post('update-role/{id}', [RolePermissionController::class, 'updateRole']);
+        Route::put('update-role/{id}', [RolePermissionController::class, 'updateRole']);
     });
     
     Route::prefix('companies')->group(function () {
