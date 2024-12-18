@@ -15,6 +15,8 @@ class UserController extends Controller
     {
         $type_employee = $request->input('type_employee') ?? null;
         $shift_employee = $request->input('shift_employee') ?? null;
+        $company = $request->input('company') ?? null;
+        $status = $request->input('status') ?? null;
 
         $query = User::with('type', 'company', 'shift')->orderBy('created_at', 'desc');
         if ($type_employee) {
@@ -23,8 +25,14 @@ class UserController extends Controller
         if ($shift_employee) {
             $query->where('shift_id', $shift_employee);
         }
+        if ($company) {
+            $query->where('company_id', $company);
+        }
+        if ($status) {
+            $query->where('status', $status);
+        }
 
-        $user = Helper::pagination($query, $request, ['name', 'email']);
+        $user = Helper::pagination($query, $request, ['name', 'email', 'nip']);
 
         return response()->json([
             'success' => true,
