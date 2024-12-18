@@ -190,6 +190,8 @@ class AttendanceController extends Controller
         $status_in = $shift ? $status($time, $shift, 'early_check_in', 'check_in') : 2;
         $status_out = $shift ? $status($time, $shift, 'early_check_out', 'check_out') : 2;
 
+        // dd($st_inorout);
+
         try {
             if ($st_inorout && $st_inorout->status == "IN") {
                 $check_present = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::parse($check_time)->format('Y-m-d'));
@@ -205,17 +207,17 @@ class AttendanceController extends Controller
                         $st_inorout->status
                     );
 
-                    return response()->json([
-                        'status' => true,
-                        'message' => 'Selamat datang ' . $attender->name,
-                    ], 200);
+                    // return response()->json([
+                    //     'status' => true,
+                    //     'message' => 'Selamat datang ' . $attender->name,
+                    // ], 200);
+                } else {
+                    Attendance::create([
+                        'user_id'         => $attender->id,
+                        'time_check_in'   => $check_time,
+                        'status_check_in' => $status_in,
+                    ]);
                 }
-
-                Attendance::create([
-                    'user_id'         => $attender->id,
-                    'time_check_in'   => $check_time,
-                    'status_check_in' => $status_in,
-                ]);
             } else {
                 $att_in = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::parse($check_time)->format('Y-m-d'))->latest()->first();
 
@@ -267,6 +269,7 @@ class AttendanceController extends Controller
             'role'         => $attender->getRoleNames(),
             'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
             'status'       => Helper::statusAtt($status_in ?? 2),
+            'photo_path'   => env('PROFILE_PHOTO_BASE_URL').$request->photo_path,
         ]);
 
         $sti = Setting::find(1);
