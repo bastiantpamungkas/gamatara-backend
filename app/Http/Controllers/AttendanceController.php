@@ -27,6 +27,7 @@ class AttendanceController extends Controller
         $status_checkin = $request->input('status_checkin') ?? null;
         $status_checkout = $request->input('status_checkout') ?? null;
         $company = $request->input('company') ?? null;
+        $type_employee_id = $request->input('type_employee_id') ?? null;
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay() : null;
 
@@ -38,6 +39,10 @@ class AttendanceController extends Controller
             ->when($company, function ($query) use ($company) {
                 $query->whereHas('user.company', function ($q) use ($company) {
                     $q->where('id', $company);
+                });
+            })->when($type_employee_id, function ($query) use ($type_employee_id) {
+                $query->whereHas('user.type', function ($q) use ($type_employee_id) {
+                    $q->where('id', $type_employee_id);
                 });
             });
 
