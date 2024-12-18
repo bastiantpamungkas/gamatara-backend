@@ -11,7 +11,7 @@ class RolePermissionController extends Controller
     public function role()
     {
         $role = Role::orderBy('id', 'asc')->get();
-        
+
         return response()->json([
             'message' => 'Successfully get all roles',
             'roles' => $role,
@@ -20,40 +20,72 @@ class RolePermissionController extends Controller
 
     public function permission()
     {
-        $permission = Permission::all()->groupBy('category');
-        
+        // $permission = Permission::all()->groupBy('category');
+        $permission = Permission::get();
+
         return response()->json([
             'message' => 'Successfully get all permissions',
             'permissions' => $permission,
         ], 200);
     }
 
-    public function store(Request $request)
+
+    public function permission_category()
     {
-        $request->validate([
-            'name' => 'required|string',
-            'permissions' => 'array'
-        ]);
-
-        $role = Role::create(['name' => $request->name]);
-
-        if ($request->has('permissions')) {
-            $role->syncPermissions($request->permissions);
-        }
-
+        $permissionCategory = Permission::select('category')->groupBy('category')->orderBy('category', 'asc')->get();
         return response()->json([
-            'message' => 'Role created successfully',
-            'role' => $role,
-            'permissions' => $role->permissions
-        ], 201);
+            'message' => 'Successfully get all category',
+            'permissionCategory' => $permissionCategory,
+        ], 200);
     }
 
-    public function editRole($id) 
+    public function store(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string',
+                'permissions' => 'array'
+            ]);
+
+            $permissions = [];
+            $permissionsData = Permission::get();
+            $category = Permission::select('category')->groupBy('category')->orderBy('category', 'asc')->get();
+            if ($category) {
+                foreach ($category as $row_category) {
+                    if ($request->has($row_category->category)) {
+                        foreach ($permissionsData as $row) {
+                            foreach ($request->input($row_category->category) as $row_request) {
+                                if (isset($row_request[$row->name])) {
+                                    if ($row_request[$row->name]) {
+                                        $permissions[] = $row->name;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            $role = Role::create(['name' => $request->name]);
+            $role->syncPermissions($permissions);            
+
+            return response()->json([
+                'message' => 'Role created successfully',
+                'role' => $role,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    public function editRole($id)
     {
         $role = Role::findOrFail($id);
         $permissions = Permission::all()->groupBy('category');
         $rolePermission = $role->permissions->pluck('id')->toArray();
-        
+
         return response()->json([
             'status' => 'Success',
             'role' => $role,
@@ -62,17 +94,46 @@ class RolePermissionController extends Controller
 
     public function updateRole(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string'
+            ]);
 
-        $role = Role::findOrFail($id);
-        $role->name = $request->name;
-        $role->save();
+    
+            $role = Role::findOrFail($id);
+            $role->name = $request->name;
+            $role->save();
 
-        return response()->json([
-            'message' => 'Role updated successfully',
-            'role' => $role,
-        ], 200);
+            $permissions = [];
+            $permissionsData = Permission::get();
+            $category = Permission::select('category')->groupBy('category')->orderBy('category', 'asc')->get();
+            if ($category) {
+                foreach ($category as $row_category) {
+                    if ($request->has($row_category->category)) {
+                        foreach ($permissionsData as $row) {
+                            foreach ($request->input($row_category->category) as $row_request) {
+                                if (isset($row_request[$row->name])) {
+                                    if ($row_request[$row->name]) {
+                                        $permissions[] = $row->name;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            $role->syncPermissions($permissions);
+            $role->permissions;
+            
+            return response()->json([
+                'message' => 'Role updated successfully',
+                'role' => $role,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 }
