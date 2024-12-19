@@ -15,7 +15,7 @@ class AttLogController extends Controller
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
         $type_employee = $request->input('type_employee') ?? null;
 
-        $att_logs = AttLog::with(['user.type', 'user.company']);
+        $att_logs = AttLog::with(['user.type', 'user.company', 'user.roles']);
 
         if ($start_date && $end_date) {
             $att_logs->where(function ($query) use ($start_date, $end_date) {
