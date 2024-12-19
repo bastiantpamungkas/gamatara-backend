@@ -114,6 +114,9 @@ class AttendanceController extends Controller
         $smallest_late = filter_var($request->input('smallest_late', false), FILTER_VALIDATE_BOOLEAN);
         $most_late = filter_var($request->input('most_late', false), FILTER_VALIDATE_BOOLEAN);
         $month = $request->input('month') ?? null;
+        $type_employee_id = $request->input('type_employee_id') ?? null;
+        $start_date = $request->input('start_date') ?? null;
+        $end_date = $request->input('end_date') ?? null;
 
         $user = User::select('id', 'name', 'nip', 'status')
             ->withCount([
@@ -164,6 +167,15 @@ class AttendanceController extends Controller
             })
             ->when($most_late, function ($q) {
                 $q->orderBy('late_attendance', 'desc');
+            })
+            ->when($type_employee_id, function ($q) use ($type_employee_id) {
+                $q->where('type_employee_id', $type_employee_id);
+            })
+            ->when($start_date, function ($q) use ($start_date) {
+                $q->where('attendance.time_check_in', '>=', $start_date);
+            })
+            ->when($end_date, function ($q) use ($end_date) {
+                $q->where('attendance.time_check_in', '<=', $end_date . ' 23:59');
             })
             ->paginate($pageSize, ['*'], 'page', $page);
 

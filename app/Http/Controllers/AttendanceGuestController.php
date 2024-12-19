@@ -169,6 +169,8 @@ class AttendanceGuestController extends Controller
         $longest_duration = filter_var($request->input('longest_duration', false), FILTER_VALIDATE_BOOLEAN);
         $shortest_duration = filter_var($request->input('shortest_duration', false), FILTER_VALIDATE_BOOLEAN);
         $year = $request->input('year') ?? null;
+        $start_date = $request->input('start_date') ?? null;
+        $end_date = $request->input('end_date') ?? null;
 
         $guest = Guest::select('id', 'name', 'phone_number')
             ->when($year, function ($q) use ($year) {
@@ -207,7 +209,16 @@ class AttendanceGuestController extends Controller
             })
             ->when($keyword, function ($q) use ($keyword) {
                 $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . strtolower($keyword) . '%'])
-                    ->orWhereRaw("LOWER(CAST(phone_number AS TEXT)) LIKE ?", ['%' . strtolower($keyword) . '%']);
+                    ->orWhereRaw("LOWER(CAST(phone_number AS TEXT)) LIKE ?", ['%' . strtolower($keyword) . '%'])
+                    ->orWhereHas('attendance_guest', function ($query) use ($keyword) {
+                        $query->orWhereRaw("LOWER(CAST(institution AS TEXT)) LIKE ?", ['%' . strtolower($keyword) . '%']);
+                    });
+            })
+            ->when($start_date, function ($q) use ($start_date) {
+                $q->where('attendance_guests.time_check_in', '>=', $start_date);
+            })
+            ->when($end_date, function ($q) use ($end_date) {
+                $q->where('attendance_guests.time_check_in', '<=', $end_date . ' 23:59');
             })
             ->paginate($pageSize, ['*'], 'page', $page);
 
