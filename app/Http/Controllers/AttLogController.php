@@ -14,18 +14,26 @@ class AttLogController extends Controller
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
         $type_employee = $request->input('type_employee') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
         $att_logs = AttLog::with(['user.type', 'user.company', 'user.roles']);
+        $att_logs->whereHas('user', function ($q) use ($type_employee, $keyword) {
+            $q->where('status', 1);
+            if ($type_employee) {
+                $q->where('type_employee_id', $type_employee);
+            }
+            if ($keyword) {
+                $q->where(function ($q_group) use ($keyword) {
+                    $q_group->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+                    $q_group->orWhereRaw("LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+                });
+            }
+        });
 
         if ($start_date && $end_date) {
             $att_logs->where(function ($query) use ($start_date, $end_date) {
                 $query->whereBetween('time_check_out', [$start_date, $end_date])
                       ->orWhereBetween('time_check_in', [$start_date, $end_date]);
-            });
-        }
-        if ($type_employee) { 
-            $att_logs->whereHas('user', function ($query) use ($type_employee) {
-                $query->where('type_employee_id', $type_employee);
             });
         }
         
@@ -43,8 +51,20 @@ class AttLogController extends Controller
     public function list_log_card(Request $request){
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
+        $keyword = $request->input('keyword') ?? null;
 
         $att_logs = AttLog::with(['user.type', 'user.company']);
+        $att_logs->whereHas('user', function ($q) use ($keyword) {
+            $q->where('status', 1)->whereHas('roles', function ($q_roles) {
+                $q_roles->where('name', 'Tamu');
+            });
+            if ($keyword) {
+                $q->where(function ($q_group) use ($keyword) {
+                    $q_group->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+                    $q_group->orWhereRaw("LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+                });
+            }
+        });
 
         if ($start_date && $end_date) {
             $att_logs->where(function ($query) use ($start_date, $end_date) {

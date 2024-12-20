@@ -16,25 +16,25 @@ class DashboardController extends Controller
     public function counts()
     {
 
-        $emp = User::count();
+        $emp = User::where('status', 1)->count();
 
-        $emp_present = User::whereHas('attendance', function ($q) {
+        $emp_present = User::where('status', 1)->whereHas('attendance', function ($q) {
             $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
         })->count();
 
-        $emp_absent = User::whereDoesntHave('attendance', function ($q) {
+        $emp_absent = User::where('status', 1)->whereDoesntHave('attendance', function ($q) {
             $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
         })->count();
 
-        $emp_late_in = User::whereHas('attendance', function ($q) {
+        $emp_late_in = User::where('status', 1)->whereHas('attendance', function ($q) {
             $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->where('status_check_in', 3);
         })->count();
 
-        $emp_early_out = User::whereHas('attendance', function ($q) {
+        $emp_early_out = User::where('status', 1)->whereHas('attendance', function ($q) {
             $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->where('status_check_out', 2);
         })->count();
 
-        $employee_in = User::whereHas('att_log', function ($q) {
+        $employee_in = User::where('status', 1)->whereHas('att_log', function ($q) {
             $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_in');
         })->count();
 
@@ -42,7 +42,7 @@ class DashboardController extends Controller
             $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_in')->whereNull('time_check_out');
         })->count();
 
-        $employee_out = User::whereHas('att_log', function ($q) {
+        $employee_out = User::where('status', 1)->whereHas('att_log', function ($q) {
             $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_out');
         })->count();
 
@@ -50,7 +50,7 @@ class DashboardController extends Controller
             $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_in')->whereNotNull('time_check_out');
         })->count();
 
-        $tap_card = User::whereHas('att_log', function ($q) {
+        $tap_card = User::where('status', 1)->whereHas('att_log', function ($q) {
             $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->orWhereDate('time_check_out', Carbon::now()->format('Y-m-d'));
         })->count();
 

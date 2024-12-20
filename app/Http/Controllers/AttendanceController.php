@@ -30,6 +30,7 @@ class AttendanceController extends Controller
         $type_employee_id = $request->input('type_employee_id') ?? null;
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay() : null;
+        $keyword = $request->input('keyword') ?? null;
 
         $att = Attendance::with(['user.shift', 'user.company', 'user.type'])->when($shift, function ($query) use ($shift) {
             $query->whereHas('user.shift', function ($q) use ($shift) {
@@ -43,6 +44,10 @@ class AttendanceController extends Controller
             })->when($type_employee_id, function ($query) use ($type_employee_id) {
                 $query->whereHas('user.type', function ($q) use ($type_employee_id) {
                     $q->where('id', $type_employee_id);
+                });
+            })->when($keyword, function ($query) use ($keyword) {
+                $query->whereHas('user', function ($q) use ($keyword) {
+                    $q->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? OR LOWER(CAST(nip AS TEXT)) = ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
                 });
             });
 
