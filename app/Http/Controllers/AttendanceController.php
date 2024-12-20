@@ -213,6 +213,8 @@ class AttendanceController extends Controller
             if ($st_inorout && $st_inorout->status == "IN") {
                 $check_present = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::parse($check_time)->format('Y-m-d'));
 
+                // dd($check_present->exists());
+                
                 if ($check_present->exists()) {
                     $att_out = AttLog::where('user_id', $attender->id)->whereDate('time_check_out', Carbon::parse($check_time)->format('Y-m-d'))->latest()->first();
 

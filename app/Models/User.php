@@ -95,4 +95,26 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsTo(Notification::class, 'user_id', 'id');
     }
+
+    public function roles()
+    {
+        return $this->morphToMany(
+            config('permission.models.role'),
+            'model',
+            config('permission.table_names.model_has_roles'),
+            config('permission.column_names.model_morph_key'),
+            'role_id'
+        );
+    }
+
+    public function permissions()
+    {
+        return $this->morphToMany(
+            config('permission.models.permission'),
+            'model',
+            config('permission.table_names.model_has_permissions'),
+            config('permission.column_names.model_morph_key'),
+            'permission_id'
+        );
+    }
 }

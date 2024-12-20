@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -23,9 +24,14 @@ class AuthController extends Controller
             if ($token = Auth::attempt($credentials)) {
 
                 if (Auth::user()->hasRole(['Super Admin', 'Security'])) {
-                    $user = Auth::user();
-                    $user->getRoleNames();
-                    $user->getAllPermissions();
+                    // $user = Auth::user();
+                    $user = User::with(['roles' => function($query){
+                        $query->with(['permissions' => function($query) {
+                            $query->select('id', 'name');
+                        }])->select('id', 'name');
+                    }])->where('id', auth()->user()->id)->first();
+                    // $user->getRoleNames();
+                    // $user->getAllPermissions();
 
                     return response()->json([
                         'success' => true,
