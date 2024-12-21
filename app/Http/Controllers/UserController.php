@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Models\PersPerson;
 use Illuminate\Http\Request;
 use App\Jobs\JobPersPerson;
+use Carbon\Carbon;
 
 class UserController extends Controller
 {
@@ -270,20 +271,20 @@ class UserController extends Controller
     public function list_absent(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
-        $absent = User::with('type', 'company', 'shift');
+        $absent = User::where('status', 1)->with('type', 'company', 'shift');
         if ($type_employee) {
             $absent->where('type_employee_id', $type_employee);
         }
+        if ($keyword) {
+            $absent->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? or LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
+        }
         $absent->whereDoesntHave('attendance', function ($query) {
-            $start_date = Date("Y-m-d");
-            $end_date = Date("Y-m-d", strtotime("+1 day"));
-
-            $query->whereBetween('time_check_out', [$start_date, $end_date])
-                ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+            $query->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
         });
 
-        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -294,12 +295,16 @@ class UserController extends Controller
     public function list_present(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
-        $absent = User::with('type', 'company', 'shift');
+        $present = User::where('status', 1)->with('type', 'company', 'shift');
         if ($type_employee) {
-            $absent->where('type_employee_id', $type_employee);
+            $present->where('type_employee_id', $type_employee);
         }
-        $absent->whereHas('attendance', function ($query) {
+        if ($keyword) {
+            $present->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? or LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
+        }
+        $present->whereHas('attendance', function ($query) {
             $start_date = Date("Y-m-d");
             $end_date = Date("Y-m-d", strtotime("+1 day"));
 
@@ -307,7 +312,7 @@ class UserController extends Controller
                 ->orWhereBetween('time_check_in', [$start_date, $end_date]);
         });
 
-        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+        $user = Helper::pagination($present->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -318,12 +323,16 @@ class UserController extends Controller
     public function list_late(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
-        $absent = User::with('type', 'company', 'shift', 'attendance');
+        $late = User::where('status', 1)->with('type', 'company', 'shift', 'attendance');
         if ($type_employee) {
-            $absent->where('type_employee_id', $type_employee);
+            $late->where('type_employee_id', $type_employee);
         }
-        $absent->whereHas('attendance', function ($query) {
+        if ($keyword) {
+            $late->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? or LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
+        }
+        $late->whereHas('attendance', function ($query) {
             $start_date = Date("Y-m-d");
             $end_date = Date("Y-m-d", strtotime("+1 day"));
 
@@ -332,7 +341,7 @@ class UserController extends Controller
                 ->orWhereBetween('time_check_in', [$start_date, $end_date]);
         });
 
-        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+        $user = Helper::pagination($late->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -343,21 +352,20 @@ class UserController extends Controller
     public function list_early_checkout(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
-        $absent = User::with('type', 'company', 'shift', 'attendance');
+        $early_checkout = User::where('status', 1)->with('type', 'company', 'shift', 'attendance');
         if ($type_employee) {
-            $absent->where('type_employee_id', $type_employee);
+            $early_checkout->where('type_employee_id', $type_employee);
         }
-        $absent->whereHas('attendance', function ($query) {
-            $start_date = Date("Y-m-d");
-            $end_date = Date("Y-m-d", strtotime("+1 day"));
-
-            $query->where('status_check_out', 2);
-            $query->whereBetween('time_check_out', [$start_date, $end_date])
-                ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        if ($keyword) {
+            $early_checkout->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? or LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
+        }
+        $early_checkout->whereHas('attendance', function ($query) {
+            $query->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->where('status_check_out', 2);
         });
 
-        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+        $user = Helper::pagination($early_checkout->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -368,20 +376,20 @@ class UserController extends Controller
     public function list_in_gate(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
-        $absent = User::with('type', 'company', 'shift', 'attendance');
+        $in_gate = User::where('status', 1)->with('type', 'company', 'shift', 'attendance');
         if ($type_employee) {
-            $absent->where('type_employee_id', $type_employee);
+            $in_gate->where('type_employee_id', $type_employee);
         }
-        $absent->whereHas('att_log', function ($query) {
-            $start_date = Date("Y-m-d");
-            $end_date = Date("Y-m-d", strtotime("+1 day"));
-
-            $query->whereBetween('time_check_in', [$start_date, $end_date]);
-            $query->whereNull('time_check_out');
+        if ($keyword) {
+            $in_gate->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? or LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
+        }
+        $in_gate->whereHas('att_log', function ($query) {
+            $query->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_in');
         });
 
-        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+        $user = Helper::pagination($in_gate->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -392,12 +400,16 @@ class UserController extends Controller
     public function list_out_gate(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
-        $absent = User::with('type', 'company', 'shift', 'attendance');
+        $out_gate = User::where('status', 1)->with('type', 'company', 'shift', 'attendance');
         if ($type_employee) {
-            $absent->where('type_employee_id', $type_employee);
+            $out_gate->where('type_employee_id', $type_employee);
         }
-        $absent->whereHas('att_log', function ($query) {
+        if ($keyword) {
+            $out_gate->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? or LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
+        }
+        $out_gate->whereHas('att_log', function ($query) {
             $start_date = Date("Y-m-d");
             $end_date = Date("Y-m-d", strtotime("+1 day"));
 
@@ -405,7 +417,7 @@ class UserController extends Controller
                 ->orWhereBetween('time_check_in', [$start_date, $end_date]);
         });
 
-        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'email']);
+        $user = Helper::pagination($out_gate->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,

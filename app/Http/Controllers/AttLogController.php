@@ -23,10 +23,7 @@ class AttLogController extends Controller
                 $q->where('type_employee_id', $type_employee);
             }
             if ($keyword) {
-                $q->where(function ($q_group) use ($keyword) {
-                    $q_group->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
-                    $q_group->orWhereRaw("LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
-                });
+                $q->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ? or LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
             }
         });
 
@@ -59,10 +56,7 @@ class AttLogController extends Controller
                 $q_roles->where('name', 'Tamu');
             });
             if ($keyword) {
-                $q->where(function ($q_group) use ($keyword) {
-                    $q_group->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
-                    $q_group->orWhereRaw("LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
-                });
+                $q->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ? or LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
             }
         });
 
