@@ -14,8 +14,25 @@ class AttLogController extends Controller
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
         $type_employee = $request->input('type_employee') ?? null;
+        $role = $request->input('role') ?? null;
+        $duration = $request->input('duration') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
         $att_logs = AttLog::with(['user.type', 'user.company', 'user.roles']);
+        $att_logs->whereHas('user', function ($q) use ($type_employee, $role, $keyword) {
+            $q->where('status', 1);
+            if ($type_employee) {
+                $q->where('type_employee_id', $type_employee);
+            }
+            if ($role) {
+                $q->whereHas('roles', function ($q_roles) use ($role) {
+                    $q_roles->where('id', $role);
+                });
+            }
+            if ($keyword) {
+                $q->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ? or LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
+            }
+        });
 
         if ($start_date && $end_date) {
             $att_logs->where(function ($query) use ($start_date, $end_date) {
@@ -23,10 +40,12 @@ class AttLogController extends Controller
                       ->orWhereBetween('time_check_in', [$start_date, $end_date]);
             });
         }
-        if ($type_employee) { 
-            $att_logs->whereHas('user', function ($query) use ($type_employee) {
-                $query->where('type_employee_id', $type_employee);
-            });
+
+        if ($duration == 'Terlama') {
+            $att_logs->orderBy('total_time', 'desc');
+        } 
+        if ($duration == 'Singkat') {
+            $att_logs->orderBy('total_time', 'asc');
         }
         
         $data = Helper::pagination($att_logs->orderBy('created_at', 'desc'), $request, [
@@ -43,8 +62,17 @@ class AttLogController extends Controller
     public function list_log_card(Request $request){
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
+        $keyword = $request->input('keyword') ?? null;
 
         $att_logs = AttLog::with(['user.type', 'user.company']);
+        $att_logs->whereHas('user', function ($q) use ($keyword) {
+            $q->where('status', 1)->whereHas('roles', function ($q_roles) {
+                $q_roles->where('name', 'Tamu');
+            });
+            if ($keyword) {
+                $q->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ? or LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
+            }
+        });
 
         if ($start_date && $end_date) {
             $att_logs->where(function ($query) use ($start_date, $end_date) {
