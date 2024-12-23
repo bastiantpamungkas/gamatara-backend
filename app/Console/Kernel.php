@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('command:syncEmployee')->everyMinute()->withoutOverlapping();
+        // $schedule->command('command:syncEmployee')->everyMinute()->withoutOverlapping();
     }
 
 

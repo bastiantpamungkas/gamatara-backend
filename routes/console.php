@@ -7,4 +7,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Artisan::command('command:syncEmployee', function () {})->purpose('Sync schedule employee from persperson to user')->everyMinute();
+// Artisan::command('command:syncEmployee', function () {})->purpose('Sync schedule employee from persperson to user')->everyMinute();
