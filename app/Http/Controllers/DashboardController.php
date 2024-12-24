@@ -35,21 +35,47 @@ class DashboardController extends Controller
             $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->where('status_check_out', 2);
         })->count();
 
-        $employee_in = User::where('status', 1)->whereHas('att_log', function ($q) {
-            $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_in');
-        })->count();
+        $employee_in = User::whereHas('att_log', function ($q) {
+            $q->where(function ($q_group) {
+                $q_group->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNull('time_check_out')->whereNull('total_time');
+            });
+            $q->orWhere(function ($q_group) {
+                $q_group->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNotNull('total_time');
+            });
+        })
+        ->where(function ($q_group) {
+            $q_group->whereHas('roles', function ($q) {
+                $q->where('name', '!=', 'Tamu');
+            })
+            ->orWhereDoesntHave('roles');
+        })
+        ->whereDoesntHave('att_log', function ($q) {
+            $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNull('time_check_in')->whereNull('total_time');
+        })
+        ->count();
 
-        $guest_in = Guest::whereHas('attendance_guest', function ($q) {
-            $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_in')->whereNull('time_check_out');
-        })->count();
+        $guest_in = AttendanceGuest::whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNull('time_check_out')->sum('total_guest');
 
-        $employee_out = User::where('status', 1)->whereHas('att_log', function ($q) {
-            $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_out');
-        })->count();
+        $employee_out = User::whereHas('att_log', function ($q) {
+            $q->where(function ($q_group) {
+                $q_group->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNull('time_check_in')->whereNull('total_time');
+            });
+            // $q->where(function ($q_group) {
+            //     $q_group->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNull('time_check_out')->whereNull('total_time');
+            // });
+        })
+        ->where(function ($q_group) {
+            $q_group->whereHas('roles', function ($q) {
+                $q->where('name', '!=', 'Tamu');
+            })
+            ->orWhereDoesntHave('roles');
+        })
+        // ->whereDoesntHave('att_log', function ($q) {
+        //     $q->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNotNull('total_time');
+        // })
+        ->count();
 
-        $guest_out = Guest::whereHas('attendance_guest', function ($q) {
-            $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_in')->whereNotNull('time_check_out');
-        })->count();
+        $guest_out = AttendanceGuest::whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->sum('total_guest');
 
         $tap_card = AttLog::where(function ($q_group) {
             $q_group->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->orWhereDate('time_check_out', Carbon::now()->format('Y-m-d'));
