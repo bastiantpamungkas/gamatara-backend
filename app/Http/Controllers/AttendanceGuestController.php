@@ -17,6 +17,7 @@ class AttendanceGuestController extends Controller
     {
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
+        $check_in_status = $request->input('check_in_status') ?? null;
 
         $data = AttendanceGuest::with('guest')->orderBy('created_at', 'desc');
         
@@ -26,8 +27,14 @@ class AttendanceGuestController extends Controller
                       ->orWhereBetween('time_check_out', [$start_date, $end_date]);
             });
         }
+        if ($check_in_status == 'in') {
+            $data->whereNull('time_check_out');
+        }
+        if ($check_in_status == 'out') {
+            $data->whereNotNull('time_check_out');
+        }
 
-        $att_guest = Helper::pagination($data, $request, ['guest.name']);
+        $att_guest = Helper::pagination($data, $request, ['institution', 'need', 'no_police', 'type_vehicle', 'guest.name', 'guest.phone_number']);
 
         return response()->json([
             'success' => true,

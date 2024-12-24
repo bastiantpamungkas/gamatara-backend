@@ -5,12 +5,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use App\Helpers\Helper;
 
 class RolePermissionController extends Controller
 {
-    public function role()
+    public function role(Request $request)
     {
-        $role = Role::orderBy('id', 'asc')->get();
+        $keyword = $request->input('keyword');
+        $role = Role::when($keyword, function ($query) use ($keyword) {
+            $query->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+        });
+
+        $role = Helper::pagination($role->orderBy('id', 'asc'), $request, [
+            'name'
+        ]);
 
         return response()->json([
             'message' => 'Successfully get all roles',

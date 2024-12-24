@@ -81,7 +81,6 @@ class AttLogController extends Controller
             });
         }
         $att_logs->orderBy('created_at', 'desc');
-        $result = $att_logs->get();
         
         $data = Helper::pagination($att_logs->orderBy('created_at', 'desc'), $request, [
             'user.name',

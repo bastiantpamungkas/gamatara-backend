@@ -46,7 +46,7 @@ class JobPersPerson implements ShouldQueue
      */
     public function handle(): void
     {
-        $person = PersPerson::get();
+        $person = PersPerson::select('pin', 'name')->get();
         if ($person) {
             foreach ($person as $row) {
                 $user = User::where('nip', $row->pin)->first();
