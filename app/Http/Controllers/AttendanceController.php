@@ -236,6 +236,12 @@ class AttendanceController extends Controller
                     //     'message' => 'Selamat datang ' . $attender->name,
                     // ], 200);
                 } else {
+                    $this->attLog(
+                        $attender->id,
+                        $check_time,
+                        $check_time,
+                        $st_inorout->status
+                    );                   
                     Attendance::create([
                         'user_id'         => $attender->id,
                         'time_check_in'   => $check_time,
@@ -256,7 +262,7 @@ class AttendanceController extends Controller
                     $att_in->update([
                         'time_check_out'  => $check_time,
                         'status_check_out' => $status_out,
-                        'duration' => $diff
+                        'time_total' => $diff
                     ]);
                 }
 
@@ -264,7 +270,7 @@ class AttendanceController extends Controller
                     $att_in->update([
                         'time_check_out'  => $check_time,
                         'status_check_out' => $status_out,
-                        'duration' => $diff
+                        'time_total' => $diff
                     ]);
                 }
 
@@ -342,12 +348,12 @@ class AttendanceController extends Controller
         $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
 
         if ($status == "IN") {
-            $attLog = AttLog::where('user_id', $attenderId)->whereNotNull('time_check_out')->latest()->first();
+            $attLog = AttLog::where('user_id', $attenderId)->whereDate('time_check_out', $check_time)->latest()->first();
 
             if ($attLog) {
                 $attLog->update([
                     'time_check_in'  => $check_time,
-                    'duration' => $diff
+                    'total_time' => $diff
                 ]);
             } else {
                 AttLog::create([
