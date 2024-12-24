@@ -385,8 +385,22 @@ class UserController extends Controller
         if ($keyword) {
             $in_gate->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? or LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
         }
-        $in_gate->whereHas('att_log', function ($query) {
-            $query->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNotNull('time_check_in');
+        $in_gate->whereHas('att_log', function ($q) {
+            $q->where(function ($q_group) {
+                $q_group->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNull('time_check_out')->whereNull('total_time');
+            });
+            $q->orWhere(function ($q_group) {
+                $q_group->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNotNull('total_time');
+            });
+        })
+        ->where(function ($q_group) {
+            $q_group->whereHas('roles', function ($q) {
+                $q->where('name', '!=', 'Tamu');
+            })
+            ->orWhereDoesntHave('roles');
+        })
+        ->whereDoesntHave('att_log', function ($q) {
+            $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNull('time_check_in')->whereNull('total_time');
         });
 
         $user = Helper::pagination($in_gate->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
@@ -409,12 +423,19 @@ class UserController extends Controller
         if ($keyword) {
             $out_gate->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? or LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
         }
-        $out_gate->whereHas('att_log', function ($query) {
-            $start_date = Date("Y-m-d");
-            $end_date = Date("Y-m-d", strtotime("+1 day"));
-
-            $query->whereBetween('time_check_out', [$start_date, $end_date])
-                ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+        $out_gate->whereHas('att_log', function ($q) {
+            $q->where(function ($q_group) {
+                $q_group->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNull('time_check_in')->whereNull('total_time');
+            });
+            // $q->where(function ($q_group) {
+            //     $q_group->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNull('time_check_out')->whereNull('total_time');
+            // });
+        })
+        ->where(function ($q_group) {
+            $q_group->whereHas('roles', function ($q) {
+                $q->where('name', '!=', 'Tamu');
+            })
+            ->orWhereDoesntHave('roles');
         });
 
         $user = Helper::pagination($out_gate->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
