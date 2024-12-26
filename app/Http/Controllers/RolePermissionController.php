@@ -13,7 +13,7 @@ class RolePermissionController extends Controller
     {
         $keyword = $request->input('keyword');
         $role = Role::when($keyword, function ($query) use ($keyword) {
-            $query->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+            $query->where("name", "ilike", '%' . $keyword . '%');
         });
 
         $role = Helper::pagination($role->orderBy('id', 'asc'), $request, [

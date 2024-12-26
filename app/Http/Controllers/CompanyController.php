@@ -11,13 +11,20 @@ use Illuminate\Http\Request;
 class CompanyController extends Controller
 {
     public function list(Request $request){
-        $data = Helper::pagination(Company::orderBy('created_at', 'desc'), $request, [
+        $keyword = $request->input('keyword');
+
+        $data = Company::orderBy('created_at', 'desc')
+        ->when($keyword, function ($query) use ($keyword) {
+            $query->where('name', 'ilike', '%'.$keyword.'%');
+        });
+
+        $company = Helper::pagination($data, $request, [
             'name'
         ]);
         
         return response()->json([
             'success' => true,
-            'data' => $data,
+            'data' => $company,
         ]);
     }
     

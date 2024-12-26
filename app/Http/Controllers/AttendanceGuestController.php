@@ -16,24 +16,67 @@ class AttendanceGuestController extends Controller
     public function list(Request $request)
     {
         $start_date = $request->input('start_date') ?? null;
-        $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
+        $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay() : null;
         $check_in_status = $request->input('check_in_status') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
-        $data = AttendanceGuest::with('guest')->orderBy('created_at', 'desc');
-        
-        if ($start_date && $end_date) {
-            $data->where(function ($query) use ($start_date, $end_date) {
-                $query->whereBetween('time_check_in', [$start_date, $end_date])
-                      ->orWhereBetween('time_check_out', [$start_date, $end_date]);
+        $data = AttendanceGuest::with('guest')->orderBy('created_at', 'desc')
+        ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
+            $query->whereBetween('time_check_in', [$start_date, $end_date]);
+        });
+        if ($keyword) {
+            if ($check_in_status == 'in') {
+                $data->whereNull('time_check_out')
+                ->where(function ($q_group) use ($keyword) {
+                    $q_group->whereHas('guest', function ($q) use ($keyword) {
+                        $q->where('name', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('phone_number', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('nik', 'ilike', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($q) use ($keyword) {
+                        $q->where('institution', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('need', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('no_police', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('type_vehicle', 'ilike', '%' . $keyword . '%');
+                    });
+                });
+            } else if ($check_in_status == 'out') {
+                $data->whereNotNull('time_check_out')
+                ->where(function ($q_group) use ($keyword) {
+                    $q_group->whereHas('guest', function ($q) use ($keyword) {
+                        $q->where('name', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('phone_number', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('nik', 'ilike', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($q) use ($keyword) {
+                        $q->where('institution', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('need', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('no_police', 'ilike', '%' . $keyword . '%');
+                        $q->orWhere('type_vehicle', 'ilike', '%' . $keyword . '%');
+                    });
+                });
+            } else {
+                $data->whereHas('guest', function ($q) use ($keyword) {
+                    $q->where('name', 'ilike', '%' . $keyword . '%');
+                    $q->orWhere('phone_number', 'ilike', '%' . $keyword . '%');
+                    $q->orWhere('nik', 'ilike', '%' . $keyword . '%');
+                });
+                $data->orWhere(function ($q) use ($keyword) {
+                    $q->where('institution', 'ilike', '%' . $keyword . '%');
+                    $q->orWhere('need', 'ilike', '%' . $keyword . '%');
+                    $q->orWhere('no_police', 'ilike', '%' . $keyword . '%');
+                    $q->orWhere('type_vehicle', 'ilike', '%' . $keyword . '%');
+                });
+            }
+        } else {
+            $data->when($check_in_status, function ($q) use ($check_in_status) {
+                if ($check_in_status == 'in') {
+                    $q->whereNull('time_check_out');
+                } else if ($check_in_status == 'out') {
+                    $q->whereNotNull('time_check_out');
+                }
             });
         }
-        if ($check_in_status == 'in') {
-            $data->whereNull('time_check_out');
-        }
-        if ($check_in_status == 'out') {
-            $data->whereNotNull('time_check_out');
-        }
-
         $att_guest = Helper::pagination($data, $request, ['institution', 'need', 'no_police', 'type_vehicle', 'guest.name', 'guest.phone_number']);
 
         return response()->json([
@@ -41,7 +84,7 @@ class AttendanceGuestController extends Controller
             'data' => $att_guest
         ], 200);
     }
-   
+
     public function list_per_guest(Request $request, $id)
     {
         $att_guest = Helper::pagination(AttendanceGuest::with('guest')->where('guest_id', $id), $request, ['guest.name', 'date', 'time_check_in', 'time_check_out']);
@@ -54,26 +97,24 @@ class AttendanceGuestController extends Controller
 
     public function store(Request $request)
     {
-        if($request->guest_id){
-           
+        if ($request->guest_id) {
+
             $guest = Guest::find($request->guest_id);
 
-            if(!$guest){
+            if (!$guest) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Guest Not Found',
                 ], 404);
             }
-
-        }else{
-            try{
+        } else {
+            try {
                 $guest = Guest::create([
                     'nik' => $request->nik,
                     'name' => $request->name,
                     'phone_number' => $request->phone_number
                 ]);
-
-            }catch(\Exception $e){
+            } catch (\Exception $e) {
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage()
@@ -85,18 +126,18 @@ class AttendanceGuestController extends Controller
             'need' => 'required'
         ]);
 
-        if($valid == true){
-            try{
+        if ($valid == true) {
+            try {
                 $att_guest = AttendanceGuest::create([
                     'guest_id' => $guest->id,
                     'institution' => $request->institution,
-                    'time_check_in' => Carbon::now()->format('Y-m-d H:i:s'),    
+                    'time_check_in' => Carbon::now()->format('Y-m-d H:i:s'),
                     'need' => $request->need,
                     'type_vehicle' => $request->type_vehicle,
                     'no_police' => $request->no_police,
                     'total_guest' => $request->total_guest
                 ]);
-    
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Success Added Guest And Attendance',
@@ -105,8 +146,7 @@ class AttendanceGuestController extends Controller
                         'attendace' => $att_guest
                     ]
                 ], 200);
-    
-            }catch(\Exception $e){
+            } catch (\Exception $e) {
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage()
@@ -122,10 +162,10 @@ class AttendanceGuestController extends Controller
 
     public function update($id)
     {
-        try{
+        try {
             $att_guest = AttendanceGuest::find($id);
 
-            if(!$att_guest){
+            if (!$att_guest) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Attendace Not Found',
@@ -133,7 +173,7 @@ class AttendanceGuestController extends Controller
             }
 
             $timeCheckIn = Carbon::parse($att_guest->time_check_in);
-            
+
             $diffInSeconds = $timeCheckIn->diffInSeconds(Carbon::now());
             $hours = floor($diffInSeconds / 3600);
             $minutes = floor(($diffInSeconds % 3600) / 60);
@@ -150,8 +190,7 @@ class AttendanceGuestController extends Controller
                 'message' => 'Success Update Attendance',
                 'data' => $att_guest
             ], 200);
-
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -163,7 +202,6 @@ class AttendanceGuestController extends Controller
             'success' => false,
             'message' => 'Failed Update Attendance',
         ], 422);
-       
     }
 
     public function report(Request $request)

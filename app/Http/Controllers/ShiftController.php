@@ -10,7 +10,14 @@ class ShiftController extends Controller
 {
     public function list(Request $request)
     {
-        $shift = Helper::pagination(Shift::orderBy('created_at', 'desc'), $request, [
+        $keyword = $request->input('keyword');
+
+        $data = Shift::orderBy('created_at', 'desc')
+        ->when($keyword, function ($query) use ($keyword) {
+            $query->where('name', 'ilike', '%'.$keyword.'%');
+        });
+
+        $shift = Helper::pagination($data, $request, [
             'name',
             'early_check_in',
             'check_in',
