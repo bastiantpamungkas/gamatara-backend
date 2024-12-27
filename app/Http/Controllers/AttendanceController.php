@@ -124,41 +124,55 @@ class AttendanceController extends Controller
 
         $user = User::select('id', 'name', 'nip', 'status')
             ->withCount([
-                'attendance' => function ($q) use ($month) {
+                'attendance' => function ($q) use ($month, $start_date, $end_date) {
                     if ($month) {
                         $yearMonth = Carbon::parse($month);
                         $q->whereYear('time_check_in', $yearMonth->year)
                             ->whereMonth('time_check_in', $yearMonth->month);
                     }
+                    if ($start_date && $end_date) {
+                        $q->whereBetween('time_check_in', [$start_date, $end_date]);
+                    }
                 },
-                'attendance as ontime_attendance' => function ($q) use ($month) {
+                'attendance as ontime_attendance' => function ($q) use ($month, $start_date, $end_date) {
                     $q->where('status_check_in', 2);
                     if ($month) {
                         $yearMonth = Carbon::parse($month);
                         $q->whereYear('time_check_in', $yearMonth->year)
                             ->whereMonth('time_check_in', $yearMonth->month);
                     }
+                    if ($start_date && $end_date) {
+                        $q->whereBetween('time_check_in', [$start_date, $end_date]);
+                    }
                 },
-                'attendance as late_attendance' => function ($q) use ($month) {
+                'attendance as late_attendance' => function ($q) use ($month, $start_date, $end_date) {
                     $q->where('status_check_in', 3);
                     if ($month) {
                         $yearMonth = Carbon::parse($month);
                         $q->whereYear('time_check_in', $yearMonth->year)
                             ->whereMonth('time_check_in', $yearMonth->month);
                     }
+                    if ($start_date && $end_date) {
+                        $q->whereBetween('time_check_in', [$start_date, $end_date]);
+                    }
                 },
-                'attendance as early_checkout' => function ($q) use ($month) {
+                'attendance as early_checkout' => function ($q) use ($month, $start_date, $end_date) {
                     $q->where('status_check_out', 1);
                     if ($month) {
                         $yearMonth = Carbon::parse($month);
                         $q->whereYear('time_check_in', $yearMonth->year)
                             ->whereMonth('time_check_in', $yearMonth->month);
                     }
+                    if ($start_date && $end_date) {
+                        $q->whereBetween('time_check_in', [$start_date, $end_date]);
+                    }
                 },
             ])
             ->when($keyword, function ($q) use ($keyword) {
-                $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . $keyword . '%'])
-                    ->orWhereRaw("LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+                $q->where(function ($q) use ($keyword) {
+                    $q->where('name', 'ilike', '%' . $keyword . '%')
+                        ->orWhere('nip', 'ilike', '%' . $keyword . '%');
+                });
             })
             ->when($status, function ($q) use ($status) {
                 $q->where('status', $status);
@@ -175,11 +189,17 @@ class AttendanceController extends Controller
             ->when($type_employee_id, function ($q) use ($type_employee_id) {
                 $q->where('type_employee_id', $type_employee_id);
             })
-            ->when($start_date, function ($q) use ($start_date) {
-                $q->where('attendance.time_check_in', '>=', $start_date);
-            })
-            ->when($end_date, function ($q) use ($end_date) {
-                $q->where('attendance.time_check_in', '<=', $end_date . ' 23:59');
+            ->when($start_date && $end_date, function ($q) use ($month, $start_date, $end_date) {
+                $q->whereHas('attendance', function ($query) use ($month, $start_date, $end_date) {
+                    if ($month) {
+                        $yearMonth = Carbon::parse($month);
+                        $query->whereYear('time_check_in', $yearMonth->year)
+                            ->whereMonth('time_check_in', $yearMonth->month);
+                    }
+                    if ($start_date && $end_date) {
+                        $query->whereBetween('time_check_in', [$start_date, $end_date]);
+                    }
+                });
             })
             ->paginate($pageSize, ['*'], 'page', $page);
 
