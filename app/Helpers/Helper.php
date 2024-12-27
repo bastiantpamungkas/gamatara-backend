@@ -35,18 +35,18 @@ class Helper
                     [$relation, $column] = explode('.', $param, 2);
 
                     // Gunakan orWhereHas untuk relasi
-                    $query->orWhereHas($relation, function ($q) use ($column, $keyword) {
-                        $q->whereRaw("LOWER(CAST($column AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
-                    });
+                    // $query->orWhereHas($relation, function ($q) use ($column, $keyword) {
+                    //     $q->whereRaw("LOWER(CAST($column AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+                    // });
                 } else {
                     // Cek jika keyword adalah tahun
-                    if (preg_match('/^\d{4}$/', $keyword)) {
-                        // Gunakan whereYear untuk kolom tanggal
-                        $query->orWhereYear($param, $keyword);
-                    } else {
-                        // Gunakan LIKE untuk kolom teks
-                        $query->orWhereRaw("LOWER(CAST($param AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
-                    }
+                    // if (preg_match('/^\d{4}$/', $keyword)) {
+                    //     // Gunakan whereYear untuk kolom tanggal
+                    //     $query->orWhereYear($param, $keyword);
+                    // } else {
+                    //     // Gunakan LIKE untuk kolom teks
+                    //     $query->orWhereRaw("LOWER(CAST($param AS TEXT)) LIKE ?", ['%' . $keyword . '%']);
+                    // }
                 }
             }
         });

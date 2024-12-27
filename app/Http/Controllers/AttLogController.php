@@ -20,34 +20,34 @@ class AttLogController extends Controller
 
         $att_logs = AttLog::with(['user.type', 'user.company', 'user.roles']);
         $att_logs->whereHas('user', function ($q) use ($type_employee, $role, $keyword) {
-            $q->where('status', 1);
-            if ($type_employee) {
+            $q->where('status', 1)
+            ->when($type_employee, function ($q) use ($type_employee) {
                 $q->where('type_employee_id', $type_employee);
-            }
-            if ($role) {
+            })
+            ->when($role, function ($q) use ($role) {
                 $q->whereHas('roles', function ($q_roles) use ($role) {
                     $q_roles->where('id', $role);
                 });
-            }
-            if ($keyword) {
-                $q->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ? or LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
+            })
+            ->when($keyword, function ($q) use ($keyword) {
+                $q->where("name",  "ilike", '%' . $keyword . '%')
+                ->orWhere("nip", $keyword);
+            });
+        })
+        ->when($start_date && $end_date, function ($q) use ($start_date, $end_date) {
+            $q->where(function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('time_check_in', [$start_date, $end_date]);
+            });
+        })
+        ->when($duration, function ($q) use ($duration) {
+            if ($duration == 'Terlama') {
+                $q->orderBy('total_time', 'desc');
+            } 
+            if ($duration == 'Singkat') {
+                $q->orderBy('total_time', 'asc');
             }
         });
-
-        if ($start_date && $end_date) {
-            $att_logs->where(function ($query) use ($start_date, $end_date) {
-                $query->whereBetween('time_check_out', [$start_date, $end_date])
-                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
-            });
-        }
-
-        if ($duration == 'Terlama') {
-            $att_logs->orderBy('total_time', 'desc');
-        } 
-        if ($duration == 'Singkat') {
-            $att_logs->orderBy('total_time', 'asc');
-        }
-        
+    
         $data = Helper::pagination($att_logs->orderBy('created_at', 'desc'), $request, [
             'user.name',
             'user.nip'
@@ -68,20 +68,20 @@ class AttLogController extends Controller
         $att_logs->whereHas('user', function ($q) use ($keyword) {
             $q->where('status', 1)->whereHas('roles', function ($q_roles) {
                 $q_roles->where('name', 'Tamu');
+            })
+            ->when($keyword, function ($q) use ($keyword) {
+                $q->where(function ($q) use ($keyword) {
+                    $q->where("name",  "ilike", '%' . $keyword . '%')
+                    ->orWhere("nip", $keyword);
+                });
             });
-            if ($keyword) {
-                $q->whereRaw("LOWER(CAST(users.name AS TEXT)) LIKE ? or LOWER(CAST(users.nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
-            }
+        })
+        ->when($start_date && $end_date, function ($q) use ($start_date, $end_date) {
+            $q->where(function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('time_check_in', [$start_date, $end_date])
+                ->orWhereBetween('time_check_out', [$start_date, $end_date]);
+            });
         });
-
-        if ($start_date && $end_date) {
-            $att_logs->where(function ($query) use ($start_date, $end_date) {
-                $query->whereBetween('time_check_out', [$start_date, $end_date])
-                      ->orWhereBetween('time_check_in', [$start_date, $end_date]);
-            });
-        }
-        $att_logs->orderBy('created_at', 'desc');
-        
         $data = Helper::pagination($att_logs->orderBy('created_at', 'desc'), $request, [
             'user.name',
             'user.nip'

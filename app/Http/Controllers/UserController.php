@@ -18,20 +18,28 @@ class UserController extends Controller
         $shift_employee = $request->input('shift_employee') ?? null;
         $company = $request->input('company') ?? null;
         $status = $request->input('status') ?? null;
+        $keyword = $request->input('keyword') ?? null;
 
-        $query = User::with('type', 'company', 'shift')->orderBy('created_at', 'desc');
-        if ($type_employee) {
-            $query->where('type_employee_id', $type_employee);
-        }
-        if ($shift_employee) {
-            $query->where('shift_id', $shift_employee);
-        }
-        if ($company) {
-            $query->where('company_id', $company);
-        }
-        if ($status) {
+        $query = User::with('type', 'company', 'shift')->orderBy('created_at', 'desc')
+        ->when($keyword, function ($query) use ($keyword) {
+            $query->where( function ($q_group) use ($keyword) {
+                $q_group->where('name', 'ilike', '%'.$keyword.'%');
+                $q_group->orWhere('email', 'ilike', '%'.$keyword.'%');
+                $q_group->orWhere("nip", $keyword);
+            });
+        })
+        ->when($status, function ($query) use ($status) {
             $query->where('status', $status);
-        }
+        })
+        ->when($type_employee, function ($query) use ($type_employee) {
+            $query->where('type_employee_id', $type_employee);
+        })
+        ->when($shift_employee, function ($query) use ($shift_employee) {
+            $query->where('shift_id', $shift_employee);
+        })
+        ->when($company, function ($query) use ($company) {
+            $query->where('company_id', $company);
+        });
 
         $user = Helper::pagination($query, $request, ['name', 'email', 'nip']);
 
