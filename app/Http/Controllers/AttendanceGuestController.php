@@ -223,11 +223,19 @@ class AttendanceGuestController extends Controller
                     $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
                 });
             })
+            ->when(($start_date && $end_date), function ($q) use ($start_date, $end_date) {
+                $q->whereHas('attendance_guest', function ($query) use ($start_date, $end_date) {
+                    $query->whereBetween('time_check_in', [$start_date, $end_date]);
+                });
+            })
             ->withCount([
-                'attendance_guest as total_attendance' => function ($query) use ($year) {
-                    if ($year) {
+                'attendance_guest as total_attendance' => function ($query) use ($year, $start_date, $end_date) {
+                    $query->when($year, function ($query) use ($year) {
                         $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
-                    }
+                    });
+                    $query->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
+                        $query->whereBetween('time_check_in', [$start_date, $end_date]);
+                    });
                 },
             ])
             ->when($most_present, function ($q) {
@@ -236,41 +244,49 @@ class AttendanceGuestController extends Controller
             ->when($smallest_present, function ($q) {
                 $q->orderBy('total_attendance', 'asc');
             })
-            ->when($longest_duration, function ($q) {
+            ->when($longest_duration, function ($q) use ($year, $start_date, $end_date) {
                 $q->addSelect([
                     'total_duration' => AttendanceGuest::selectRaw(
                         "SUM(EXTRACT(EPOCH FROM CAST(duration AS INTERVAL)))"
                     )
-                        ->whereColumn('attendance_guests.guest_id', 'guests.id'),
+                        ->whereColumn('attendance_guests.guest_id', 'guests.id')
+                        ->when($year, function ($query) use ($year) {
+                            $query->whereRaw("EXTRACT(YEAR FROM attendance_guests.time_check_in) = ?", [$year]);
+                        })
+                        ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
+                            $query->whereBetween('attendance_guests.time_check_in', [$start_date, $end_date]);
+                        }),
                 ])->orderBy('total_duration', 'desc');
             })
-            ->when($shortest_duration, function ($q) {
+            ->when($shortest_duration, function ($q) use($year, $start_date, $end_date) {
                 $q->addSelect([
                     'total_duration' => AttendanceGuest::selectRaw(
                         "SUM(EXTRACT(EPOCH FROM CAST(duration AS INTERVAL)))"
                     )
-                        ->whereColumn('attendance_guests.guest_id', 'guests.id'),
+                        ->whereColumn('attendance_guests.guest_id', 'guests.id')
+                        ->when($year, function ($query) use ($year) {
+                            $query->whereRaw("EXTRACT(YEAR FROM attendance_guests.time_check_in) = ?", [$year]);
+                        })
+                        ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
+                            $query->whereBetween('attendance_guests.time_check_in', [$start_date, $end_date]);
+                        }),
                 ])->orderBy('total_duration', 'asc');
             })
             ->when($keyword, function ($q) use ($keyword) {
-                $q->orWhereRaw("LOWER(CAST(name AS TEXT)) LIKE ?", ['%' . strtolower($keyword) . '%'])
-                    ->orWhereRaw("LOWER(CAST(phone_number AS TEXT)) LIKE ?", ['%' . strtolower($keyword) . '%'])
-                    ->orWhereHas('attendance_guest', function ($query) use ($keyword) {
-                        $query->orWhereRaw("LOWER(CAST(institution AS TEXT)) LIKE ?", ['%' . strtolower($keyword) . '%']);
-                    });
-            })
-            ->when($start_date, function ($q) use ($start_date) {
-                $q->where('attendance_guests.time_check_in', '>=', $start_date);
-            })
-            ->when($end_date, function ($q) use ($end_date) {
-                $q->where('attendance_guests.time_check_in', '<=', $end_date . ' 23:59');
+                $q->where(function ($q_group) use ($keyword) {
+                    $q_group->where("name", "ilike" , '%' . $keyword . '%')
+                        ->orWhere("phone_number", "ilike", '%' . $keyword . '%');
+                });
             })
             ->paginate($pageSize, ['*'], 'page', $page);
 
-        $guest->getCollection()->transform(function ($q) use ($year) {
+        $guest->getCollection()->transform(function ($q) use ($year, $start_date, $end_date) {
             $lastAttendance = AttendanceGuest::where('guest_id', $q->id)
                 ->when($year, function ($query) use ($year) {
                     $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
+                })
+                ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
+                    $query->whereBetween('time_check_in', [$start_date, $end_date]);
                 })
                 ->latest()
                 ->first();
@@ -284,6 +300,9 @@ class AttendanceGuestController extends Controller
             $totalDuration = AttendanceGuest::where('guest_id', $q->id)
                 ->when($year, function ($query) use ($year) {
                     $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
+                })
+                ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
+                    $query->whereBetween('time_check_in', [$start_date, $end_date]);
                 })
                 ->selectRaw(
                     "TO_CHAR(SUM(EXTRACT(EPOCH FROM CAST(duration AS INTERVAL))) * interval '1 second', 'HH24:MI:SS') as total_duration"
