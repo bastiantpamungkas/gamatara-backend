@@ -56,7 +56,7 @@ class JobPersPerson implements ShouldQueue
                     $user->nip = $row->pin;
                     $user->email = Str::slug($row->name) . $row->pin . '@gmail.com';
                     $user->password = Hash::make('1235678');
-                    $user->type_employee_id = 1;
+                    // $user->type_employee_id = 1;
                     $user->save();
                 } else {
                     User::create(
