@@ -293,14 +293,23 @@ class DashboardController extends Controller
         }
 
         // Fetch all employee types
-        $type_employees = \App\Models\TypeEmployee::all();
+        $data_type = TypeEmployee::query();
+        $data_type->when($type_employee, function ($query) use ($type_employee) {
+            $query->where('id', $type_employee);
+        });
+        $type_employees = $data_type->get();
+        $colors[1] = '#1E88E5';
+        $colors[2] = '#FDD835';
+        $colors[3] = '#E91E63';
+
         $data = [];
+        $color_cart = [];
 
         foreach ($type_employees as $type) {
             // Check if type_employee is specified
-            if ($type_employee && $type->id != $type_employee) {
-                continue;
-            }
+            // if ($type_employee && $type->id != $type_employee) {
+            //     continue;
+            // }
 
             $current_date = Carbon::parse($date_start);
             $end_date = Carbon::parse($date_end);
@@ -326,6 +335,10 @@ class DashboardController extends Controller
                 'type_employee_name' => $type->name,
                 'attendance' => $attendance_counts,
             ];
+
+            if (isset($colors[$type->id])) {
+                $color_cart[] = $colors[$type->id];
+            }
         }
 
         return response()->json([
@@ -334,6 +347,7 @@ class DashboardController extends Controller
                 'date_start' => $date_start,
                 'date_end' => $date_end,
             ],
+            'colors' => $color_cart,
             'days' => $get_all_days,
             'data' => $data, // Contains categorized attendance data
         ], 200);
