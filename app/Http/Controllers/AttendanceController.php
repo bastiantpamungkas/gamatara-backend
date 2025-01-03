@@ -226,7 +226,7 @@ class AttendanceController extends Controller
             $attender = $this->userCreate($request);
         }
 
-        $shift = $attender->shift_id ? Shift::find($attender->shift_id) : null;
+        $shift = $attender->shift_id ? $attender->shift : null;
         $time = Carbon::parse($check_time)->format('H:i:s');
         $status_in = $shift ? $status($time, $shift, 'early_check_in', 'check_in') : 2;
         $status_out = $shift ? $status($time, $shift, 'early_check_out', 'check_out') : 2;
@@ -234,6 +234,22 @@ class AttendanceController extends Controller
         // dd($st_inorout);
 
         try {
+            $greeting = $st_inorout && $st_inorout->status == "IN" ? "Selamat Datang" : "Sampai Jumpa";
+            $entry_time_status = $st_inorout && $st_inorout->status == "IN" ? "Masuk " : "Keluar ";
+            $access_status = $st_inorout && $st_inorout->status == "IN" ? "Check In" : "Check Out";
+
+            $this->publishToAbly('gate', [
+                'name'         => $attender->name,
+                'greeting'     => $greeting,
+                'accessStatus' => $access_status,
+                // 'role'         => $attender->getRoleNames(),
+                'role'         => '',
+                'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
+                // 'status'       => Helper::statusAtt($status_in ?? 2),
+                'status'       => '',
+                'photo_path'   => env('PROFILE_PHOTO_BASE_URL').$request->photo_path,
+            ]);
+
             if ($st_inorout && $st_inorout->status == "IN") {
                 $check_present = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::parse($check_time)->format('Y-m-d'));
 
@@ -306,20 +322,6 @@ class AttendanceController extends Controller
                 'message' => $e->getMessage()
             ], 422);
         }
-
-        $greeting = $st_inorout && $st_inorout->status == "IN" ? "Selamat Datang" : "Sampai Jumpa";
-        $entry_time_status = $st_inorout && $st_inorout->status == "IN" ? "Masuk " : "Keluar ";
-        $access_status = $st_inorout && $st_inorout->status == "IN" ? "Check In" : "Check Out";
-
-        $this->publishToAbly('gate', [
-            'name'         => $attender->name,
-            'greeting'     => $greeting,
-            'accessStatus' => $access_status,
-            'role'         => $attender->getRoleNames(),
-            'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
-            'status'       => Helper::statusAtt($status_in ?? 2),
-            'photo_path'   => env('PROFILE_PHOTO_BASE_URL').$request->photo_path,
-        ]);
 
         $sti = Setting::find(1);
 
