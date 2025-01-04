@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use App\Models\PersPerson;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Jobs\JobPostPhoto;
 
 class JobPersPerson implements ShouldQueue
 {
@@ -46,7 +46,7 @@ class JobPersPerson implements ShouldQueue
      */
     public function handle(): void
     {
-        $person = PersPerson::select('pin', 'name')->get();
+        $person = PersPerson::select('pin', 'name', 'photo_path')->get();
         if ($person) {
             foreach ($person as $row) {
                 $user = User::where('nip', $row->pin)->first();
@@ -70,6 +70,7 @@ class JobPersPerson implements ShouldQueue
                         ]
                     );
                 }
+                JobPostPhoto::dispatch(['photo_path' => $row->photo_path]);
             };
         }
     }
