@@ -242,11 +242,9 @@ class AttendanceController extends Controller
                 'name'         => $attender->name,
                 'greeting'     => $greeting,
                 'accessStatus' => $access_status,
-                // 'role'         => $attender->getRoleNames(),
-                'role'         => '',
+                'role'         => $attender->getRoleNames(),
                 'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
-                // 'status'       => Helper::statusAtt($status_in ?? 2),
-                'status'       => '',
+                'status'       => Helper::statusAtt($status_in ?? 2),
                 // 'photo_path'   => env('PROFILE_PHOTO_BASE_URL').$request->photo_path,
                 'photo_path'   => $request->photo_path,
             ]);
