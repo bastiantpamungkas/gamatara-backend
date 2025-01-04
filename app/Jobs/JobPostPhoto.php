@@ -8,6 +8,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class JobPostPhoto implements ShouldQueue
 {
@@ -44,8 +48,37 @@ class JobPostPhoto implements ShouldQueue
     public function handle(): void
     {
         $data = $this->data;
-        Http::post(env('FE_BASE_URL') . '/api/sync', [
-            'photo_path' => $data['photo_path'],
-        ]);
+        $photoUrl = env('PROFILE_PHOTO_BASE_URL') . $data['photo_path'];
+
+        try {
+            // Fetch the file from the URL
+            $response = Http::get($photoUrl);
+            if ($response->successful()) {
+                $fileContents = $response->body();
+                $fileName = basename($photoUrl);
+                $pathInfo = pathinfo($photoUrl);
+                $dirName = $pathInfo['dirname'];
+                $relativeDirPath = parse_url($dirName, PHP_URL_PATH);
+                $filePath = $relativeDirPath . '/' . $fileName;
+
+                // Ensure the directory exists
+                Storage::disk('public')->makeDirectory($relativeDirPath);
+
+                // Save the resized and compressed image to the directory
+                Storage::disk('public')->put($filePath, $fileContents);
+
+                // create image manager with desired driver
+                $manager = new ImageManager(new Driver());
+                // read image from file system
+                $image = $manager->read(public_path('storage' . $filePath));
+                // Image Crop
+                $image->scale(width:450);
+                $image->save(public_path('storage' . $filePath));
+            }
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+        }
+
+        
     }
 }
