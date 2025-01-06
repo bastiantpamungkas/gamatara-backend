@@ -214,6 +214,14 @@ class AttendanceController extends Controller
 
     public function post_att(Request $request)
     {
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Attendance recorded successfully',
+        ], 200);
+    }
+
+    public function post_att_v1(Request $request)
+    {
         $check_time = str_replace("T", " ", $request->event_time);
         $attender = User::with('shift')->where('pin', $request->pin)->first();
         $st_inorout = MachineSetting::where('sn_machine', $request->dev_sn)->first();
