@@ -69,6 +69,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('update/{id}', [UserController::class, 'update']);
         Route::put('update_status', [UserController::class, 'update_status']);
         Route::put('update_shift', [UserController::class, 'update_shift']);
+        Route::put('update_shift2', [UserController::class, 'update_shift2']);
         Route::delete('delete/{id}', [UserController::class, 'delete']);
     });
 
