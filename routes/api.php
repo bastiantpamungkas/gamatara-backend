@@ -24,7 +24,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('/post_att', [AttendanceController::class, 'post_att']);
-Route::post('/post_att_v1', [AttendanceController::class, 'post_att_v1']);
+Route::post('/post_att_v1', [AttendanceController::class, 'post_att_v2']);
 
 Route::post('/', [FaceScanController::class, 'facescan']);
 
@@ -68,6 +68,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('update/{id}', [UserController::class, 'update']);
         Route::put('update_status', [UserController::class, 'update_status']);
         Route::put('update_shift', [UserController::class, 'update_shift']);
+        Route::put('update_shift2', [UserController::class, 'update_shift2']);
         Route::delete('delete/{id}', [UserController::class, 'delete']);
     });
 
