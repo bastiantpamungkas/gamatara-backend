@@ -347,142 +347,156 @@ class AttendanceController extends Controller
 
     public function post_att_v2(Request $request)
     {
-        $check_time = str_replace("T", " ", $request->event_time);
-        $attender = User::with('shift', 'shift2')->where('pin', $request->pin)->first();
-        $st_inorout = MachineSetting::where('sn_machine', $request->dev_sn)->first();
+        // event_time, pin, dev_sn, name, dept_code, photo_path
+        $valid = Helper::validator($request->all(), [
+            'event_time' => 'required',
+            'pin' => 'required',
+            'dev_sn' => 'required'
+        ]);
 
-        $status = function ($time, $shift, $early, $normal) {
-            return $time < $shift->$early ? 1 : ($time < $shift->$normal ? 2 : 3);
-        };
+        if ($valid === true) {
+            $check_time = str_replace("T", " ", $request->event_time);
+            $attender = User::with('shift', 'shift2')->where('pin', $request->pin)->first();
+            $st_inorout = MachineSetting::where('sn_machine', $request->dev_sn)->first();
 
-        if (!$attender) {
-            $attender = $this->userCreate($request);
-        }
+            $status = function ($time, $shift, $early, $normal) {
+                return $time < $shift->$early ? 1 : ($time < $shift->$normal ? 2 : 3);
+            };
 
-        if ($attender->shift_id && $attender->shift_id2) {
-            // check shift yang di pakai
-            $date_event = Carbon::parse($request->event_time);
-            $date = Carbon::parse($attender->shift->check_in);
-            $date2 = Carbon::parse($attender->shift2->check_in);
-            $diffShift = abs($date_event->diffInSeconds($date));
-            $diffShift2 = abs($date_event->diffInSeconds($date2));
-
-            if ($diffShift <=  $diffShift2) {
-                // use shift1
-                $shift = $attender->shift_id ? $attender->shift : null;
-            } else {
-                // use shift2
-                $shift = $attender->shift_id2 ? $attender->shift2 : null;
+            if (!$attender) {
+                $attender = $this->userCreate($request);
             }
-        } else {
-            $shift = $attender->shift_id ? $attender->shift : null;
-        }
-        $time = Carbon::parse($check_time)->format('H:i:s');
-        $status_in = $shift ? $status($time, $shift, 'early_check_in', 'check_in') : 2;
-        $status_out = $shift ? $status($time, $shift, 'early_check_out', 'check_out') : 2;
 
-        try {
-            $greeting = $st_inorout && $st_inorout->status == "IN" ? "Selamat Datang" : "Sampai Jumpa";
-            $entry_time_status = $st_inorout && $st_inorout->status == "IN" ? "Masuk " : "Keluar ";
-            $access_status = $st_inorout && $st_inorout->status == "IN" ? "Check In" : "Check Out";
+            if ($attender->shift_id && $attender->shift_id2) {
+                // check shift yang di pakai
+                $date_event = Carbon::parse($request->event_time);
+                $date = Carbon::parse($attender->shift->check_in);
+                $date2 = Carbon::parse($attender->shift2->check_in);
+                $diffShift = abs($date_event->diffInSeconds($date));
+                $diffShift2 = abs($date_event->diffInSeconds($date2));
 
-            $this->publishToAbly('gate', [
-                'name'         => $attender->name,
-                'greeting'     => $greeting,
-                'accessStatus' => $access_status,
-                'role'         => $attender->getRoleNames(),
-                'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
-                'status'       => Helper::statusAtt($status_in ?? 2),
-                'photo_path'   => env('PROFILE_PHOTO_LARAVEL_URL').$request->photo_path,
-            ]);
+                if ($diffShift <=  $diffShift2) {
+                    // use shift1
+                    $shift = $attender->shift_id ? $attender->shift : null;
+                } else {
+                    // use shift2
+                    $shift = $attender->shift_id2 ? $attender->shift2 : null;
+                }
+            } else {
+                $shift = $attender->shift_id ? $attender->shift : null;
+            }
+            $time = Carbon::parse($check_time)->format('H:i:s');
+            $status_in = $shift ? $status($time, $shift, 'early_check_in', 'check_in') : 2;
+            $status_out = $shift ? $status($time, $shift, 'early_check_out', 'check_out') : 2;
 
-            if ($st_inorout && $st_inorout->status == "IN") {
-                $check_present = Attendance::where('user_id', $attender->id)->where('status', 1);
-                if ($check_present->exists()) {
-                    $att_out = AttLog::where('user_id', $attender->id)->whereNull('time_check_in')->whereDate('time_check_out', '>=' , Carbon::parse($check_time)->subDay()->format('Y-m-d'))->latest()->first();
-                    if ($att_out) {
+            try {
+                $greeting = $st_inorout && $st_inorout->status == "IN" ? "Selamat Datang" : "Sampai Jumpa";
+                $entry_time_status = $st_inorout && $st_inorout->status == "IN" ? "Masuk " : "Keluar ";
+                $access_status = $st_inorout && $st_inorout->status == "IN" ? "Check In" : "Check Out";
 
-                        // AttLog
+                $this->publishToAbly('gate', [
+                    'name'         => $attender->name,
+                    'greeting'     => $greeting,
+                    'accessStatus' => $access_status,
+                    'role'         => $attender->getRoleNames(),
+                    'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
+                    'status'       => Helper::statusAtt($status_in ?? 2),
+                    'photo_path'   => env('PROFILE_PHOTO_LARAVEL_URL').$request->photo_path,
+                ]);
+
+                if ($st_inorout && $st_inorout->status == "IN") {
+                    $check_present = Attendance::where('user_id', $attender->id)->where('status', 1);
+                    if ($check_present->exists()) {
+                        $att_out = AttLog::where('user_id', $attender->id)->whereNull('time_check_in')->whereDate('time_check_out', '>=' , Carbon::parse($check_time)->subDay()->format('Y-m-d'))->latest()->first();
+                        if ($att_out) {
+
+                            // AttLog
+                            $this->attLog_v2(
+                                $attender->id,
+                                $att_out->time_check_out,
+                                $check_time,
+                                $st_inorout->status,
+                                $shift
+                            );
+                        }
+                    } else {
+                        Attendance::create([
+                            'user_id'         => $attender->id,
+                            'time_check_in'   => $check_time,
+                            'status_check_in' => $status_in,
+                            'status'          => 1,
+                            'shift_id'        => $shift->id,
+                        ]);
                         $this->attLog_v2(
                             $attender->id,
-                            $att_out->time_check_out,
+                            $check_time,
                             $check_time,
                             $st_inorout->status,
                             $shift
                         );
                     }
                 } else {
-                    Attendance::create([
-                        'user_id'         => $attender->id,
-                        'time_check_in'   => $check_time,
-                        'status_check_in' => $status_in,
-                        'status'          => 1,
-                        'shift_id'        => $shift->id,
-                    ]);
-                    $this->attLog_v2(
-                        $attender->id,
-                        $check_time,
-                        $check_time,
-                        $st_inorout->status,
-                        $shift
-                    );
+                    $att_in = Attendance::where('user_id', $attender->id)->where('status', 1)->latest()->first();
+                    if ($att_in) {
+                        $shiftDuration = 0;
+                        if ($att_in->shift) {
+                            $shiftCheckIn = Carbon::parse($att_in->shift->check_in);
+                            $shiftCheckOut = Carbon::parse($att_in->shift->check_out);
+                            $shiftDuration = abs($shiftCheckOut->diffInSeconds($shiftCheckIn));
+                        }
+
+                        $timeCheckIn = Carbon::parse($att_in->time_check_in);
+                        $diffInSeconds = $timeCheckIn->diffInSeconds($check_time);
+                        $hours = floor($diffInSeconds / 3600);
+                        $minutes = floor(($diffInSeconds % 3600) / 60);
+                        $seconds = $diffInSeconds % 60;
+                        $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+
+                        $dataPayload = [
+                            'time_check_out'  => $check_time,
+                            'status_check_out' => $status_out,
+                            'time_total' => $diff,
+                        ];
+                        if ($diffInSeconds >= $shiftDuration) {
+                            $dataPayload['status'] = 0;
+                        }
+                        $att_in->update($dataPayload);
+
+                        $this->attLog_v2(
+                            $attender->id,
+                            $att_in->time_check_out,
+                            $check_time,
+                            $st_inorout->status,
+                            $shift
+                        );
+                    }
                 }
-            } else {
-                $att_in = Attendance::where('user_id', $attender->id)->where('status', 1)->latest()->first();
-                if ($att_in) {
-                    $shiftDuration = 0;
-                    if ($att_in->shift) {
-                        $shiftCheckIn = Carbon::parse($att_in->shift->check_in);
-                        $shiftCheckOut = Carbon::parse($att_in->shift->check_out);
-                        $shiftDuration = abs($shiftCheckOut->diffInSeconds($shiftCheckIn));
-                    }
+            } catch (Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 422);
+            }
 
-                    $timeCheckIn = Carbon::parse($att_in->time_check_in);
-                    $diffInSeconds = $timeCheckIn->diffInSeconds($check_time);
-                    $hours = floor($diffInSeconds / 3600);
-                    $minutes = floor(($diffInSeconds % 3600) / 60);
-                    $seconds = $diffInSeconds % 60;
-                    $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+            $sti = Setting::find(1);
 
-                    $dataPayload = [
-                        'time_check_out'  => $check_time,
-                        'status_check_out' => $status_out,
-                        'time_total' => $diff,
-                    ];
-                    if ($diffInSeconds >= $shiftDuration) {
-                        $dataPayload['status'] = 0;
-                    }
-                    $att_in->update($dataPayload);
-
-                    $this->attLog_v2(
-                        $attender->id,
-                        $att_in->time_check_out,
-                        $check_time,
-                        $st_inorout->status,
-                        $shift
-                    );
+            if ($sti->status == "ON") {
+                if ($attender->type_employee_id == 1 || $attender->type_employee_id == 2) {
+                    // masuk ke queue job
+                    // $this->post_batik($request, $st_inorout->status == "IN" ? 1 : 2);
+                    JobPostBatik::dispatch([$request, $st_inorout->status == "IN" ? 1 : 2]);
                 }
             }
-        } catch (Exception $e) {
+
             return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 422);
-        }
-
-        $sti = Setting::find(1);
-
-        if ($sti->status == "ON") {
-            if ($attender->type_employee_id == 1 || $attender->type_employee_id == 2) {
-                // masuk ke queue job
-                // $this->post_batik($request, $st_inorout->status == "IN" ? 1 : 2);
-                JobPostBatik::dispatch([$request, $st_inorout->status == "IN" ? 1 : 2]);
-            }
+                'success'    => true,
+                'message'    => 'Attendance recorded successfully',
+            ], 200);
         }
 
         return response()->json([
-            'success'    => true,
-            'message'    => 'Attendance recorded successfully',
+            'success' => false,
+            'message' => "Failed Attendance recorded",
         ], 200);
     }
 
