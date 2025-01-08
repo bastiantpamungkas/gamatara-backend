@@ -25,6 +25,7 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/post_att', [AttendanceController::class, 'post_att']);
 Route::post('/post_att_v1', [AttendanceController::class, 'post_att_v1']);
+Route::post('/post_att_v2', [AttendanceController::class, 'post_att_v2']);
 
 Route::post('/', [FaceScanController::class, 'facescan']);
 

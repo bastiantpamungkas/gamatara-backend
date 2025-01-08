@@ -20,7 +20,7 @@ class UserController extends Controller
         $status = $request->input('status') ?? null;
         $keyword = $request->input('keyword') ?? null;
 
-        $query = User::with('type', 'company', 'shift')->orderBy('created_at', 'desc')
+        $query = User::with('type', 'company', 'shift', 'shift2')->orderBy('created_at', 'desc')
         ->when($keyword, function ($query) use ($keyword) {
             $query->where( function ($q_group) use ($keyword) {
                 $q_group->where('name', 'ilike', '%'.$keyword.'%');
@@ -34,8 +34,11 @@ class UserController extends Controller
         ->when($type_employee, function ($query) use ($type_employee) {
             $query->where('type_employee_id', $type_employee);
         })
-        ->when($shift_employee, function ($query) use ($shift_employee) {
-            $query->where('shift_id', $shift_employee);
+        ->when($shift_employee, function ($query) use ($shift_employee) { 
+            $query->where(function ($q_group) use ($shift_employee) {
+                $q_group->where('shift_id', $shift_employee);
+                $q_group->orWhere('shift_id2', $shift_employee);
+            });
         })
         ->when($company, function ($query) use ($company) {
             $query->where('company_id', $company);
@@ -138,7 +141,7 @@ class UserController extends Controller
 
     public function detail($id)
     {
-        $user = User::with('type', 'company', 'shift')->find($id);
+        $user = User::with('type', 'company', 'shift', 'shift2')->find($id);
 
         if (!$user) {
             return response()->json([
@@ -276,12 +279,36 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function update_shift2(Request $request)
+    {
+        $ids = $request->input('ids');
+        $shift_id = $request->input('shift_id', 1);
+
+        if (empty($ids)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No IDs provided.'
+            ], 422);
+        }
+
+        $user = User::whereIn('id', $ids);
+
+        $user->update(['shift_id2' => $shift_id]);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Success Update Shift Employee',
+            'data' => User::whereIn('id', $ids)->get()
+        ], 200);
+    }
+
     public function list_absent(Request $request)
     {
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
 
-        $absent = User::where('status', 1)->with('type', 'company', 'shift');
+        $absent = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
         if ($type_employee) {
             $absent->where('type_employee_id', $type_employee);
         }
@@ -305,7 +332,7 @@ class UserController extends Controller
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
 
-        $present = User::where('status', 1)->with('type', 'company', 'shift');
+        $present = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
         if ($type_employee) {
             $present->where('type_employee_id', $type_employee);
         }
@@ -333,7 +360,7 @@ class UserController extends Controller
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
 
-        $late = User::where('status', 1)->with('type', 'company', 'shift', 'attendance');
+        $late = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
         if ($type_employee) {
             $late->where('type_employee_id', $type_employee);
         }
@@ -362,7 +389,7 @@ class UserController extends Controller
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
 
-        $early_checkout = User::where('status', 1)->with('type', 'company', 'shift', 'attendance');
+        $early_checkout = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
         if ($type_employee) {
             $early_checkout->where('type_employee_id', $type_employee);
         }
@@ -386,7 +413,7 @@ class UserController extends Controller
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
 
-        $in_gate = User::where('status', 1)->with('type', 'company', 'shift', 'attendance');
+        $in_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
         if ($type_employee) {
             $in_gate->where('type_employee_id', $type_employee);
         }
@@ -424,7 +451,7 @@ class UserController extends Controller
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
 
-        $out_gate = User::where('status', 1)->with('type', 'company', 'shift', 'attendance');
+        $out_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
         if ($type_employee) {
             $out_gate->where('type_employee_id', $type_employee);
         }

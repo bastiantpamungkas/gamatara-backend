@@ -91,6 +91,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsTo(Shift::class, 'shift_id', 'id');
     }
 
+    public function shift2()
+    {
+        return $this->belongsTo(Shift::class, 'shift_id2', 'id');
+    }
+
     public function notification()
     {
         return $this->belongsTo(Notification::class, 'user_id', 'id');
