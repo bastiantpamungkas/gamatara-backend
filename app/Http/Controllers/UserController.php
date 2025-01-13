@@ -180,7 +180,14 @@ class UserController extends Controller
                     ], 404);
                 }
 
-                $user->update($request->all());
+                $data = $request->all();
+                if ($request->input('shift_id2')) {
+                    // do nothing
+                } else {
+                    $data['shift_id2'] = null;
+                }
+
+                $user->update($data);
 
                 $user->syncRoles([]);
 

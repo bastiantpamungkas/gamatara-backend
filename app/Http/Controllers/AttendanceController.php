@@ -425,7 +425,7 @@ class AttendanceController extends Controller
                             'time_check_in'   => $check_time,
                             'status_check_in' => $status_in,
                             'status'          => 1,
-                            'shift_id'        => $shift->id,
+                            'shift_id'        => ($shift) ? $shift->id : null,
                         ]);
                         $this->attLog_v2(
                             $attender->id,
@@ -467,7 +467,7 @@ class AttendanceController extends Controller
                             $att_in->time_check_out,
                             $check_time,
                             $st_inorout->status,
-                            $shift
+                            ($att_in->shift) ? $att_in->shift : null
                         );
                     }
                 }
