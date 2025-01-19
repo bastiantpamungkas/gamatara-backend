@@ -23,7 +23,7 @@ class AuthController extends Controller
         if ($valid == true) {
             if ($token = Auth::attempt($credentials)) {
 
-                if (Auth::user()->hasRole(['Super Admin', 'Security'])) {
+                // if (Auth::user()->hasRole(['Super Admin', 'Security'])) {
                     // $user = Auth::user();
                     $user = User::with(['roles' => function($query){
                         $query->with(['permissions' => function($query) {
@@ -40,12 +40,12 @@ class AuthController extends Controller
                         'token_type' => 'bearer',
                         'user' => $user
                     ]);
-                } else {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "You Don't Have Access",
-                    ], 401);
-                }
+                // } else {
+                //     return response()->json([
+                //         'success' => false,
+                //         'message' => "You Don't Have Access",
+                //     ], 401);
+                // }
             }
 
             return response()->json([
