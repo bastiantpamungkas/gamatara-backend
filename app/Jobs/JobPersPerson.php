@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\PersPerson;
 use App\Models\User;
 use App\Jobs\JobPostPhoto;
+use App\Jobs\JobPersLeavePerson;
 
 class JobPersPerson implements ShouldQueue
 {
@@ -73,5 +74,6 @@ class JobPersPerson implements ShouldQueue
                 JobPostPhoto::dispatch(['photo_path' => $row->photo_path]);
             };
         }
+        JobPersLeavePerson::dispatch();
     }
 }
