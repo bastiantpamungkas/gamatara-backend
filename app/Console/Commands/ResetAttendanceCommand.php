@@ -29,14 +29,14 @@ class ResetAttendanceCommand extends Command
      */
     public function handle()
     {
-        // $date = Carbon::now()->format('Y-m-d');   // auto
-        $date = '2025-01-07';   // reset status attendance
+        $date = Carbon::now()->format('Y-m-d');   // auto
+        // $date = '2025-01-07';   // reset status attendance
         $pin = '10050';     // contoh pak umar
         //reset attendance status
         $attendance = Attendance::where('status', 1)->whereDate('time_check_in', $date)
-        ->whereHas('user', function($q) use ($pin) {
-            $q->where('pin', $pin);
-        })
+        // ->whereHas('user', function($q) use ($pin) {
+        //     $q->where('pin', $pin);
+        // })
         ->get();
 
         $check_time = Carbon::parse($date . ' 23:59:59');
