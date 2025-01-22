@@ -443,7 +443,7 @@ class AttendanceController extends Controller
                             $shiftCheckIn = Carbon::parse($att_in->shift->check_in);
                             $shiftCheckOut = Carbon::parse($att_in->shift->check_out);
                             $shiftDuration = abs($shiftCheckOut->diffInSeconds($shiftCheckIn));
-                            $timeCheckIn = Carbon::parse($att_in->shift->check_in);
+                            $timeCheckIn = Carbon::parse(Carbon::parse($check_time)->format('Y-m-d') . ' ' . $att_in->shift->check_in);
                         } else {
                             $timeCheckIn = Carbon::parse($att_in->time_check_in);
                         }
