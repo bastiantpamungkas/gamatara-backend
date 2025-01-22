@@ -448,7 +448,7 @@ class AttendanceController extends Controller
                             $timeCheckIn = Carbon::parse($att_in->time_check_in);
                         }
 
-                        $diffInSeconds = abs($timeCheckIn->diffInSeconds($check_time));
+                        $diffInSeconds = $timeCheckIn->diffInSeconds($check_time);
                         $hours = floor($diffInSeconds / 3600);
                         $minutes = floor(($diffInSeconds % 3600) / 60);
                         $seconds = $diffInSeconds % 60;
@@ -556,7 +556,7 @@ class AttendanceController extends Controller
     private function attLog_v2($attenderId, $time_start, $check_time, $status, $shift = null)
     {
         $timeStartCheck = Carbon::parse($time_start);
-        $diffInSeconds = abs($timeStartCheck->diffInSeconds(Carbon::parse($check_time)));
+        $diffInSeconds = $timeStartCheck->diffInSeconds(Carbon::parse($check_time));
         $hours = floor($diffInSeconds / 3600);
         $minutes = floor(($diffInSeconds % 3600) / 60);
         $seconds = $diffInSeconds % 60;
