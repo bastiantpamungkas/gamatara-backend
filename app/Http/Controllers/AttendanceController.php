@@ -443,10 +443,12 @@ class AttendanceController extends Controller
                             $shiftCheckIn = Carbon::parse($att_in->shift->check_in);
                             $shiftCheckOut = Carbon::parse($att_in->shift->check_out);
                             $shiftDuration = abs($shiftCheckOut->diffInSeconds($shiftCheckIn));
+                            $timeCheckIn = Carbon::parse($att_in->shift->check_in);
+                        } else {
+                            $timeCheckIn = Carbon::parse($att_in->time_check_in);
                         }
 
-                        $timeCheckIn = Carbon::parse($att_in->time_check_in);
-                        $diffInSeconds = $timeCheckIn->diffInSeconds($check_time);
+                        $diffInSeconds = abs($timeCheckIn->diffInSeconds($check_time));
                         $hours = floor($diffInSeconds / 3600);
                         $minutes = floor(($diffInSeconds % 3600) / 60);
                         $seconds = $diffInSeconds % 60;
@@ -554,7 +556,7 @@ class AttendanceController extends Controller
     private function attLog_v2($attenderId, $time_start, $check_time, $status, $shift = null)
     {
         $timeStartCheck = Carbon::parse($time_start);
-        $diffInSeconds = $timeStartCheck->diffInSeconds(Carbon::parse($check_time));
+        $diffInSeconds = abs($timeStartCheck->diffInSeconds(Carbon::parse($check_time)));
         $hours = floor($diffInSeconds / 3600);
         $minutes = floor(($diffInSeconds % 3600) / 60);
         $seconds = $diffInSeconds % 60;
@@ -564,7 +566,7 @@ class AttendanceController extends Controller
             if ($shift && $shift->is_overnight) {
                 $attLog = AttLog::where('user_id', $attenderId)->whereNull('time_check_in')->whereDate('time_check_out', '>=' , Carbon::parse($check_time)->subDay()->format('Y-m-d'))->latest()->first();
             } else {
-                $attLog = AttLog::where('user_id', $attenderId)->whereDate('time_check_in', $check_time)->latest()->first();
+                $attLog = AttLog::where('user_id', $attenderId)->whereDate('time_check_out', $check_time)->latest()->first();
             }
             
             if ($attLog) {

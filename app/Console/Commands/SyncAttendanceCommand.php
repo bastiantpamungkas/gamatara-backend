@@ -29,8 +29,8 @@ class SyncAttendanceCommand extends Command
      */
     public function handle()
     {
-        $date = '2025-01-07';   // start implementasi shift2
-        $pin = '10050';     // contoh pak umar
+        $date = '2025-01-22';   // start implementasi shift2
+        $pin = '10174';     // contoh pak umar
         $accTrans = AccTransaction::whereDate('event_time', $date)
             ->whereHas('pers_person', function($q) use ($pin) {
                 $q->where('pin', $pin);

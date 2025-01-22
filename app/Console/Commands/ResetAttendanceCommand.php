@@ -30,13 +30,13 @@ class ResetAttendanceCommand extends Command
     public function handle()
     {
         $date = Carbon::now()->format('Y-m-d');   // auto
-        // $date = '2025-01-07';   // reset status attendance
-        $pin = '10050';     // contoh pak umar
+        $date = '2025-01-22';   // reset status attendance
+        $pin = '10174';     // contoh pak umar
         //reset attendance status
         $attendance = Attendance::where('status', 1)->whereDate('time_check_in', $date)
-        // ->whereHas('user', function($q) use ($pin) {
-        //     $q->where('pin', $pin);
-        // })
+        ->whereHas('user', function($q) use ($pin) {
+            $q->where('pin', $pin);
+        })
         ->get();
 
         $check_time = Carbon::parse($date . ' 23:59:59');
@@ -59,6 +59,13 @@ class ResetAttendanceCommand extends Command
                 if ($diffInSeconds >= $shiftDuration) {
                     $row->status = 0;
                     $row->save();
+                } else {
+                    if ($row->shift && $row->shift->is_overnight) {
+                        // do nothing
+                    } else {
+                        $row->status = 0;
+                        $row->save();
+                    }
                 }
             }
         }
