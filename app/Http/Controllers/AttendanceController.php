@@ -564,7 +564,7 @@ class AttendanceController extends Controller
             if ($shift && $shift->is_overnight) {
                 $attLog = AttLog::where('user_id', $attenderId)->whereNull('time_check_in')->whereDate('time_check_out', '>=' , Carbon::parse($check_time)->subDay()->format('Y-m-d'))->latest()->first();
             } else {
-                $attLog = AttLog::where('user_id', $attenderId)->whereDate('time_check_out', $check_time)->latest()->first();
+                $attLog = AttLog::where('user_id', $attenderId)->whereDate('time_check_in', $check_time)->latest()->first();
             }
             
             if ($attLog) {
