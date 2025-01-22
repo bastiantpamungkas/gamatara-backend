@@ -30,13 +30,13 @@ class ResetAttendanceCommand extends Command
     public function handle()
     {
         $date = Carbon::now()->format('Y-m-d');   // auto
-        $date = '2025-01-22';   // reset status attendance
+        // $date = '2025-01-22';   // reset status attendance
         $pin = '10174';     // contoh pak umar
         //reset attendance status
         $attendance = Attendance::where('status', 1)->whereDate('time_check_in', $date)
-        ->whereHas('user', function($q) use ($pin) {
-            $q->where('pin', $pin);
-        })
+        // ->whereHas('user', function($q) use ($pin) {
+        //     $q->where('pin', $pin);
+        // })
         ->get();
 
         $check_time = Carbon::parse($date . ' 23:59:59');
@@ -47,9 +47,10 @@ class ResetAttendanceCommand extends Command
                     $shiftCheckIn = Carbon::parse($row->shift->check_in);
                     $shiftCheckOut = Carbon::parse($row->shift->check_out);
                     $shiftDuration = abs($shiftCheckOut->diffInSeconds($shiftCheckIn));
-                }
-
-                $timeCheckIn = Carbon::parse($row->time_check_in);
+                    $timeCheckIn = Carbon::parse(Carbon::parse($check_time)->format('Y-m-d') . ' ' . $row->shift->check_in);
+                } else {
+                    $timeCheckIn = Carbon::parse($row->time_check_in);
+                }                
                 $diffInSeconds = $timeCheckIn->diffInSeconds($check_time);
                 $hours = floor($diffInSeconds / 3600);
                 $minutes = floor(($diffInSeconds % 3600) / 60);
