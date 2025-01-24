@@ -11,8 +11,10 @@ class ShiftController extends Controller
     public function list(Request $request)
     {
         $keyword = $request->input('keyword');
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
-        $data = Shift::orderBy('created_at', 'desc')
+        $data = Shift::orderBy($sort, $sortDirection)
         ->when($keyword, function ($query) use ($keyword) {
             $query->where('name', 'ilike', '%'.$keyword.'%');
         });

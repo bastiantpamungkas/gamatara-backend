@@ -19,8 +19,10 @@ class AttendanceGuestController extends Controller
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay() : null;
         $check_in_status = $request->input('check_in_status') ?? null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
-        $data = AttendanceGuest::with('guest')->orderBy('created_at', 'desc')
+        $data = AttendanceGuest::with('guest')->orderBy($sort, $sortDirection)
         ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
             $query->whereBetween('time_check_in', [$start_date, $end_date]);
         });
@@ -216,6 +218,8 @@ class AttendanceGuestController extends Controller
         $year = $request->input('year') ?? null;
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $guest = Guest::select('id', 'name', 'phone_number')
             ->when($year, function ($q) use ($year) {
@@ -243,6 +247,9 @@ class AttendanceGuestController extends Controller
             })
             ->when($smallest_present, function ($q) {
                 $q->orderBy('total_attendance', 'asc');
+            })
+            ->when($sort && $sortDirection, function ($q) use ($sort, $sortDirection) {
+                $q->orderBy($sort, $sortDirection);
             })
             ->when($longest_duration, function ($q) use ($year, $start_date, $end_date) {
                 $q->addSelect([

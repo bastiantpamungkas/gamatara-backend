@@ -12,11 +12,14 @@ class RolePermissionController extends Controller
     public function role(Request $request)
     {
         $keyword = $request->input('keyword');
+        $sort = $request->input('sort', 'id');
+        $sortDirection = $request->input('type', 'asc');
+
         $role = Role::when($keyword, function ($query) use ($keyword) {
             $query->where("name", "ilike", '%' . $keyword . '%');
         });
 
-        $role = Helper::pagination($role->orderBy('id', 'asc'), $request, [
+        $role = Helper::pagination($role->orderBy($sort, $sortDirection), $request, [
             'name'
         ]);
 

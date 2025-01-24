@@ -17,6 +17,8 @@ class AttLogController extends Controller
         $role = $request->input('role') ?? null;
         $duration = $request->input('duration') ?? null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $att_logs = AttLog::with(['user.type', 'user.company', 'user.roles']);
         $att_logs->whereHas('user', function ($q) use ($type_employee, $role, $keyword) {
@@ -48,7 +50,7 @@ class AttLogController extends Controller
             }
         });
     
-        $data = Helper::pagination($att_logs->orderBy('created_at', 'desc'), $request, [
+        $data = Helper::pagination($att_logs->orderBy($sort, $sortDirection), $request, [
             'user.name',
             'user.nip'
         ]);
@@ -63,6 +65,8 @@ class AttLogController extends Controller
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay(): null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $att_logs = AttLog::with(['user.type', 'user.company']);
         $att_logs->whereHas('user', function ($q) use ($keyword) {
@@ -82,7 +86,7 @@ class AttLogController extends Controller
                 ->orWhereBetween('time_check_out', [$start_date, $end_date]);
             });
         });
-        $data = Helper::pagination($att_logs->orderBy('created_at', 'desc'), $request, [
+        $data = Helper::pagination($att_logs->orderBy($sort, $sortDirection), $request, [
             'user.name',
             'user.nip'
         ]);

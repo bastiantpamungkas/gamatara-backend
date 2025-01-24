@@ -31,6 +31,8 @@ class AttendanceController extends Controller
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay() : null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $att = Attendance::with(['user.shift', 'user.company', 'user.type'])
         ->whereHas('user', function ($q) use ($keyword) {
@@ -65,7 +67,7 @@ class AttendanceController extends Controller
             $query->whereBetween('time_check_in', [$start_date, $end_date]);
         });
 
-        $att = Helper::pagination($att->orderBy('created_at', 'desc'), $request, [
+        $att = Helper::pagination($att->orderBy($sort, $sortDirection), $request, [
             'time_check_in',
             'time_check_out',
             'user.name',
@@ -121,6 +123,8 @@ class AttendanceController extends Controller
         $type_employee_id = $request->input('type_employee_id') ?? null;
         $start_date = $request->input('start_date') ?? null;
         $end_date = $request->input('end_date') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $user = User::select('id', 'name', 'nip', 'status')
             ->withCount([
@@ -185,6 +189,9 @@ class AttendanceController extends Controller
             })
             ->when($most_late, function ($q) {
                 $q->orderBy('late_attendance', 'desc');
+            })
+            ->when($sort && $sortDirection, function ($q) use ($sort, $sortDirection) {
+                $q->orderBy($sort, $sortDirection);
             })
             ->when($type_employee_id, function ($q) use ($type_employee_id) {
                 $q->where('type_employee_id', $type_employee_id);

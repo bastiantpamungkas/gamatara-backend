@@ -12,8 +12,10 @@ class CompanyController extends Controller
 {
     public function list(Request $request){
         $keyword = $request->input('keyword');
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
-        $data = Company::orderBy('created_at', 'desc')
+        $data = Company::orderBy($sort, $sortDirection)
         ->when($keyword, function ($query) use ($keyword) {
             $query->where('name', 'ilike', '%'.$keyword.'%');
         });

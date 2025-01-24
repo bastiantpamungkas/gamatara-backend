@@ -19,8 +19,10 @@ class UserController extends Controller
         $company = $request->input('company') ?? null;
         $status = $request->input('status') ?? null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
-        $query = User::with('type', 'company', 'shift', 'shift2')->orderBy('created_at', 'desc')
+        $query = User::with('type', 'company', 'shift', 'shift2')->orderBy($sort, $sortDirection)
         ->when($keyword, function ($query) use ($keyword) {
             $query->where( function ($q_group) use ($keyword) {
                 $q_group->where('name', 'ilike', '%'.$keyword.'%');
@@ -314,6 +316,8 @@ class UserController extends Controller
     {
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $absent = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
         if ($type_employee) {
@@ -326,7 +330,7 @@ class UserController extends Controller
             $query->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
         });
 
-        $user = Helper::pagination($absent->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
+        $user = Helper::pagination($absent->orderBy($sort, $sortDirection), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -338,6 +342,8 @@ class UserController extends Controller
     {
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $present = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
         if ($type_employee) {
@@ -354,7 +360,7 @@ class UserController extends Controller
                 ->orWhereBetween('time_check_in', [$start_date, $end_date]);
         });
 
-        $user = Helper::pagination($present->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
+        $user = Helper::pagination($present->orderBy($sort, $sortDirection), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -366,6 +372,8 @@ class UserController extends Controller
     {
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $late = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
         if ($type_employee) {
@@ -383,7 +391,7 @@ class UserController extends Controller
                 ->orWhereBetween('time_check_in', [$start_date, $end_date]);
         });
 
-        $user = Helper::pagination($late->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
+        $user = Helper::pagination($late->orderBy($sort, $sortDirection), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -395,6 +403,8 @@ class UserController extends Controller
     {
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $early_checkout = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
         if ($type_employee) {
@@ -407,7 +417,7 @@ class UserController extends Controller
             $query->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->where('status_check_out', 2);
         });
 
-        $user = Helper::pagination($early_checkout->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
+        $user = Helper::pagination($early_checkout->orderBy($sort, $sortDirection), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -419,6 +429,8 @@ class UserController extends Controller
     {
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $in_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
         if ($type_employee) {
@@ -445,7 +457,7 @@ class UserController extends Controller
             $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNull('time_check_in')->whereNull('total_time');
         });
 
-        $user = Helper::pagination($in_gate->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
+        $user = Helper::pagination($in_gate->orderBy($sort, $sortDirection), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
@@ -457,6 +469,8 @@ class UserController extends Controller
     {
         $type_employee = $request->input('type_employee') ?? null;
         $keyword = $request->input('keyword') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
 
         $out_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
         if ($type_employee) {
@@ -480,7 +494,7 @@ class UserController extends Controller
             ->orWhereDoesntHave('roles');
         });
 
-        $user = Helper::pagination($out_gate->orderBy('created_at', 'desc'), $request, ['name', 'nip', 'email']);
+        $user = Helper::pagination($out_gate->orderBy($sort, $sortDirection), $request, ['name', 'nip', 'email']);
 
         return response()->json([
             'success' => true,
