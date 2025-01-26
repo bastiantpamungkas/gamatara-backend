@@ -384,7 +384,7 @@ class UserController extends Controller
         }
         $late->whereHas('attendance', function ($query) {
             $query->where('status_check_in', 3);
-            $query->whereDate('time_check_out', Carbon::now()->format('Y-m-d'));
+            $query->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
         });
 
         $user = Helper::pagination($late->orderBy($sort, $sortDirection), $request, ['name', 'nip', 'email']);
