@@ -383,12 +383,8 @@ class UserController extends Controller
             $late->whereRaw("LOWER(CAST(name AS TEXT)) LIKE ? or LOWER(CAST(nip AS TEXT)) LIKE ?", ['%' . $keyword . '%', '%' . $keyword . '%']);
         }
         $late->whereHas('attendance', function ($query) {
-            $start_date = Date("Y-m-d");
-            $end_date = Date("Y-m-d", strtotime("+1 day"));
-
             $query->where('status_check_in', 3);
-            $query->whereBetween('time_check_out', [$start_date, $end_date])
-                ->orWhereBetween('time_check_in', [$start_date, $end_date]);
+            $query->whereDate('time_check_out', Carbon::now()->format('Y-m-d'));
         });
 
         $user = Helper::pagination($late->orderBy($sort, $sortDirection), $request, ['name', 'nip', 'email']);
