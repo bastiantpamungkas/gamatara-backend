@@ -376,6 +376,9 @@ class UserController extends Controller
         $sortDirection = $request->input('type', 'desc');
 
         $late = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
+        $late->with(['attendance' => function ($query) {
+            $query->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->where('status_check_in', 3);
+        }]);
         if ($type_employee) {
             $late->where('type_employee_id', $type_employee);
         }
@@ -401,7 +404,10 @@ class UserController extends Controller
         $sort = $request->input('sort', 'created_at');
         $sortDirection = $request->input('type', 'desc');
 
-        $early_checkout = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
+        $early_checkout = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
+        $early_checkout->with(['attendance' => function ($query) {
+            $query->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->where('status_check_out', 2);
+        }]);
         if ($type_employee) {
             $early_checkout->where('type_employee_id', $type_employee);
         }
