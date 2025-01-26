@@ -433,7 +433,10 @@ class UserController extends Controller
         $sort = $request->input('sort', 'created_at');
         $sortDirection = $request->input('type', 'desc');
 
-        $in_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
+        $in_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
+        $in_gate->with(['attendance' => function ($query) {
+            $query->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
+        }]);
         if ($type_employee) {
             $in_gate->where('type_employee_id', $type_employee);
         }
@@ -473,7 +476,10 @@ class UserController extends Controller
         $sort = $request->input('sort', 'created_at');
         $sortDirection = $request->input('type', 'desc');
 
-        $out_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
+        $out_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
+        $out_gate->with(['attendance' => function ($query) {
+            $query->whereDate('time_check_out', Carbon::now()->format('Y-m-d'));
+        }]);
         if ($type_employee) {
             $out_gate->where('type_employee_id', $type_employee);
         }
