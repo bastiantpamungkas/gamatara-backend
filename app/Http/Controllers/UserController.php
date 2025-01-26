@@ -375,7 +375,7 @@ class UserController extends Controller
         $sort = $request->input('sort', 'created_at');
         $sortDirection = $request->input('type', 'desc');
 
-        $late = User::where('status', 1)->with('type', 'company', 'shift', 'shift2', 'attendance');
+        $late = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
         if ($type_employee) {
             $late->where('type_employee_id', $type_employee);
         }
