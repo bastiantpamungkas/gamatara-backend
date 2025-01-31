@@ -22,7 +22,7 @@ class UserController extends Controller
         $sort = $request->input('sort', 'created_at');
         $sortDirection = $request->input('type', 'desc');
 
-        $query = User::with('type', 'company', 'shift', 'shift2')->orderBy($sort, $sortDirection)
+        $query = User::with('type', 'company', 'shift', 'shift2', 'roles')->orderBy($sort, $sortDirection)
         ->when($keyword, function ($query) use ($keyword) {
             $query->where( function ($q_group) use ($keyword) {
                 $q_group->where('name', 'ilike', '%'.$keyword.'%');
