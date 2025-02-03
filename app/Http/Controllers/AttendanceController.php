@@ -377,8 +377,8 @@ class AttendanceController extends Controller
             if ($attender->shift_id && $attender->shift_id2) {
                 // check shift yang di pakai
                 $date_event = Carbon::parse($request->event_time);
-                $date = Carbon::parse($attender->shift->check_in);
-                $date2 = Carbon::parse($attender->shift2->check_in);
+                $date = Carbon::parse($date_event->format('Y-m-d') . ' ' . $attender->shift->check_in);
+                $date2 = Carbon::parse($date_event->format('Y-m-d') . ' ' . $attender->shift2->check_in);
                 $diffShift = abs($date_event->diffInSeconds($date));
                 $diffShift2 = abs($date_event->diffInSeconds($date2));
 
@@ -401,16 +401,6 @@ class AttendanceController extends Controller
                 $entry_time_status = $st_inorout && $st_inorout->status == "IN" ? "Masuk " : "Keluar ";
                 $access_status = $st_inorout && $st_inorout->status == "IN" ? "Check In" : "Check Out";
 
-                $this->publishToAbly('gate', [
-                    'name'         => $attender->name,
-                    'greeting'     => $greeting,
-                    'accessStatus' => $access_status,
-                    'role'         => $attender->getRoleNames(),
-                    'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
-                    'status'       => Helper::statusAtt($status_in ?? 2),
-                    'photo_path'   => env('PROFILE_PHOTO_LARAVEL_URL').$request->photo_path,
-                ]);
-
                 if ($st_inorout && $st_inorout->status == "IN") {
                     $check_present = Attendance::where('user_id', $attender->id)->where('status', 1);
                     if ($check_present->exists()) {
@@ -427,13 +417,26 @@ class AttendanceController extends Controller
                             );
                         }
                     } else {
-                        Attendance::create([
-                            'user_id'         => $attender->id,
-                            'time_check_in'   => $check_time,
-                            'status_check_in' => $status_in,
-                            'status'          => 1,
-                            'shift_id'        => ($shift) ? $shift->id : null,
-                        ]);
+                        if ($shift && $shift->is_overnight) {
+                            Attendance::create([
+                                'user_id'         => $attender->id,
+                                'time_check_in'   => $check_time,
+                                'status_check_in' => $status_in,
+                                'status'          => 1,
+                                'shift_id'        => ($shift) ? $shift->id : null,
+                            ]);
+                        } else {
+                            $check_present = Attendance::where('user_id', $attender->id)->whereDate('time_check_in', Carbon::parse($check_time)->format('Y-m-d'))->where('status', 0);
+                            if (!$check_present->exists()) {
+                                Attendance::create([
+                                    'user_id'         => $attender->id,
+                                    'time_check_in'   => $check_time,
+                                    'status_check_in' => $status_in,
+                                    'status'          => 1,
+                                    'shift_id'        => ($shift) ? $shift->id : null,
+                                ]);
+                            }
+                        }
                         $this->attLog_v2(
                             $attender->id,
                             $check_time,
@@ -450,12 +453,16 @@ class AttendanceController extends Controller
                             $shiftCheckIn = Carbon::parse($att_in->shift->check_in);
                             $shiftCheckOut = Carbon::parse($att_in->shift->check_out);
                             $shiftDuration = abs($shiftCheckOut->diffInSeconds($shiftCheckIn));
-                            $timeCheckIn = Carbon::parse(Carbon::parse($check_time)->format('Y-m-d') . ' ' . $att_in->shift->check_in);
+                            if ($att_in->shift->is_overnight) {
+                                $timeCheckIn = Carbon::parse(Carbon::parse($att_in->time_check_in)->format('Y-m-d') . ' ' . $att_in->shift->check_in);
+                            } else {
+                                $timeCheckIn = Carbon::parse(Carbon::parse($check_time)->format('Y-m-d') . ' ' . $att_in->shift->check_in);
+                            }
                         } else {
                             $timeCheckIn = Carbon::parse($att_in->time_check_in);
                         }
 
-                        $diffInSeconds = $timeCheckIn->diffInSeconds($check_time);
+                        $diffInSeconds = abs($timeCheckIn->diffInSeconds($check_time));
                         $hours = floor($diffInSeconds / 3600);
                         $minutes = floor(($diffInSeconds % 3600) / 60);
                         $seconds = $diffInSeconds % 60;
@@ -480,6 +487,16 @@ class AttendanceController extends Controller
                         );
                     }
                 }
+
+                $this->publishToAbly('gate', [
+                    'name'         => $attender->name,
+                    'greeting'     => $greeting,
+                    'accessStatus' => $access_status,
+                    'role'         => $attender->getRoleNames(),
+                    'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
+                    'status'       => Helper::statusAtt($status_in ?? 2),
+                    'photo_path'   => env('PROFILE_PHOTO_LARAVEL_URL').$request->photo_path,
+                ]);
             } catch (Exception $e) {
                 return response()->json([
                     'success' => false,
@@ -571,7 +588,7 @@ class AttendanceController extends Controller
 
         if ($status == "IN") {
             if ($shift && $shift->is_overnight) {
-                $attLog = AttLog::where('user_id', $attenderId)->whereNull('time_check_in')->whereDate('time_check_out', '>=' , Carbon::parse($check_time)->subDay()->format('Y-m-d'))->latest()->first();
+                $attLog = AttLog::where('user_id', $attenderId)->whereNull('time_check_in')->whereDate('time_check_out', Carbon::parse($check_time)->subDay()->format('Y-m-d'))->latest()->first();
             } else {
                 $attLog = AttLog::where('user_id', $attenderId)->whereDate('time_check_out', $check_time)->latest()->first();
             }
