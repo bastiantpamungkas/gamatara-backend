@@ -76,6 +76,7 @@ class JobPostPhoto implements ShouldQueue
                 $image->save(public_path('storage' . $filePath));
             }
         } catch (\Throwable $th) {
+            Log::error($photoUrl);
             Log::error($th->getMessage());
         }
 
