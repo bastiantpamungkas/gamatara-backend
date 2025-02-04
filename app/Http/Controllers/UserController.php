@@ -189,6 +189,7 @@ class UserController extends Controller
                     $data['shift_id2'] = null;
                 }
 
+                unset($data['password']);
                 $user->update($data);
 
                 $user->syncRoles([]);
