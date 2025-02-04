@@ -434,8 +434,13 @@ class UserController extends Controller
         $sortDirection = $request->input('type', 'desc');
 
         $in_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
-        $in_gate->with(['attendance' => function ($query) {
-            $query->whereDate('time_check_in', Carbon::now()->format('Y-m-d'));
+        $in_gate->with(['att_log' => function ($query) {
+            $query->where(function ($q_group) {
+                $q_group->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereNull('time_check_out')->whereNull('total_time');
+            });
+            $query->orWhere(function ($q_group) {
+                $q_group->whereDate('time_check_in', Carbon::now()->format('Y-m-d'))->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNotNull('total_time');
+            });
         }]);
         if ($type_employee) {
             $in_gate->where('type_employee_id', $type_employee);
@@ -456,10 +461,10 @@ class UserController extends Controller
                 $q->where('name', '!=', 'Tamu');
             })
             ->orWhereDoesntHave('roles');
-        })
-        ->whereDoesntHave('att_log', function ($q) {
-            $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNull('time_check_in')->whereNull('total_time');
         });
+        // ->whereDoesntHave('att_log', function ($q) {
+        //     $q->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNull('time_check_in')->whereNull('total_time');
+        // });
 
         $user = Helper::pagination($in_gate->orderBy($sort, $sortDirection), $request, ['name', 'nip', 'email']);
 
@@ -477,8 +482,10 @@ class UserController extends Controller
         $sortDirection = $request->input('type', 'desc');
 
         $out_gate = User::where('status', 1)->with('type', 'company', 'shift', 'shift2');
-        $out_gate->with(['attendance' => function ($query) {
-            $query->whereDate('time_check_out', Carbon::now()->format('Y-m-d'));
+        $out_gate->with(['att_log' => function ($query) {
+            $query->where(function ($q_group) {
+                $q_group->whereDate('time_check_out', Carbon::now()->format('Y-m-d'))->whereNull('time_check_in')->whereNull('total_time');
+            });
         }]);
         if ($type_employee) {
             $out_gate->where('type_employee_id', $type_employee);
