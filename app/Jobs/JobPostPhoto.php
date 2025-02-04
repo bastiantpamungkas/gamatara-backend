@@ -50,36 +50,36 @@ class JobPostPhoto implements ShouldQueue
         $data = $this->data;
         $photoUrl = env('PROFILE_PHOTO_BASE_URL') . $data['photo_path'];
 
-        try {
-            // Fetch the file from the URL
-            $response = Http::get($photoUrl);
-            if ($response->successful()) {
-                $fileContents = $response->body();
-                $fileName = basename($photoUrl);
-                $pathInfo = pathinfo($photoUrl);
-                $dirName = $pathInfo['dirname'];
-                $relativeDirPath = parse_url($dirName, PHP_URL_PATH);
-                $filePath = $relativeDirPath . '/' . $fileName;
-
-                // Ensure the directory exists
-                Storage::disk('public')->makeDirectory($relativeDirPath);
-
-                // Save the resized and compressed image to the directory
-                Storage::disk('public')->put($filePath, $fileContents);
-
-                // create image manager with desired driver
-                $manager = new ImageManager(new Driver());
-                // read image from file system
-                $image = $manager->read(public_path('storage' . $filePath));
-                // Image Crop
-                $image->scale(width:450);
-                $image->save(public_path('storage' . $filePath));
+        if ($data['photo_path']) {
+            try {
+                // Fetch the file from the URL
+                $response = Http::get($photoUrl);
+                if ($response->successful()) {
+                    $fileContents = $response->body();
+                    $fileName = basename($photoUrl);
+                    $pathInfo = pathinfo($photoUrl);
+                    $dirName = $pathInfo['dirname'];
+                    $relativeDirPath = parse_url($dirName, PHP_URL_PATH);
+                    $filePath = $relativeDirPath . '/' . $fileName;
+    
+                    // Ensure the directory exists
+                    Storage::disk('public')->makeDirectory($relativeDirPath);
+    
+                    // Save the resized and compressed image to the directory
+                    Storage::disk('public')->put($filePath, $fileContents);
+    
+                    // create image manager with desired driver
+                    $manager = new ImageManager(new Driver());
+                    // read image from file system
+                    $image = $manager->read(public_path('storage' . $filePath));
+                    // Image Crop
+                    $image->scale(width:450);
+                    $image->save(public_path('storage' . $filePath));
+                }
+            } catch (\Throwable $th) {
+                Log::error($photoUrl);
+                Log::error($th->getMessage());
             }
-        } catch (\Throwable $th) {
-            Log::error($photoUrl);
-            Log::error($th->getMessage());
-        }
-
-        
+        }  
     }
 }
