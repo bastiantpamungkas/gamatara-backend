@@ -68,7 +68,7 @@ class AttLogController extends Controller
         $sort = $request->input('sort', 'created_at');
         $sortDirection = $request->input('type', 'desc');
 
-        $att_logs = AttLog::with(['user.type', 'user.company']);
+        $att_logs = AttLog::with(['user.type', 'user.company', 'user.roles']);
         $att_logs->whereHas('user', function ($q) use ($keyword) {
             $q->where('status', 1)->whereHas('roles', function ($q_roles) {
                 $q_roles->where('name', 'Tamu');
