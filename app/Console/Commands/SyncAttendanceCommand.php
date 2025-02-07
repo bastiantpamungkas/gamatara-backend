@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Attendance;
+use App\Models\AttLog;
 use App\Models\AccTransaction;
 use App\Jobs\JobPostAtt;
 use Carbon\Carbon;
@@ -15,25 +16,63 @@ class SyncAttendanceCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'command:syncAttendance';
+    protected $signature = 'command:syncAttendance {--date=} {--pin=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Sync schedule attendance from bio-security to attendance & att_log';
+    protected $description = 'Sync schedule attendance from bio-security to attendance & att_log usage command:syncAttendance [--date=] [--pin=]';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $date = '2025-01-22';   // start implementasi shift2
-        $pin = '10174';     // contoh pak umar
+        $date = $this->option('date') ?? Carbon::now()->format('Y-m-d'); // Default to current date if not provided
+        $pin = $this->option('pin'); // Get the pin option
+
+        // $date = '2025-02-02';   // start implementasi shift2
+        // $pin = '10272';     // contoh pak umar
+
+        AttLog::whereDate('time_check_in', $date)
+            ->whereHas('user', function($query) use ($pin) {
+                $query->when($pin, function ($q) use ($pin) {
+                    $q->where('pin', $pin);
+                });
+            })
+            ->delete();
+        
+        AttLog::whereDate('time_check_out', $date)
+            ->whereHas('user', function($query) use ($pin) {
+                $query->when($pin, function ($q) use ($pin) {
+                    $q->where('pin', $pin);
+                });
+            })
+            ->delete();
+
+        Attendance::whereDate('time_check_in', $date)
+            ->whereHas('user', function($query) use ($pin) {
+                $query->when($pin, function ($q) use ($pin) {
+                    $q->where('pin', $pin);
+                });
+            })
+            ->delete();
+
+        Attendance::whereDate('time_check_out', $date)
+            ->whereHas('user', function($query) use ($pin) {
+                $query->when($pin, function ($q) use ($pin) {
+                    $q->where('pin', $pin);
+                });
+            })
+            ->delete();
+
         $accTrans = AccTransaction::whereDate('event_time', $date)
-            ->whereHas('pers_person', function($q) use ($pin) {
-                $q->where('pin', $pin);
+            ->whereHas('pers_person', function($query) use ($pin) {
+                $query->when($pin, function ($q) use ($pin) {
+                    $q->where('pin', $pin);
+                });
             })
             ->orderBy('event_time', 'asc')
             ->get();
