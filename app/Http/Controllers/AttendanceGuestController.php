@@ -10,6 +10,8 @@ use App\Models\AttendanceGuest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Exports\AttendanceGuestReport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceGuestController extends Controller
 {
@@ -220,8 +222,17 @@ class AttendanceGuestController extends Controller
         $end_date = $request->input('end_date') ?? null;
         $sort = $request->input('sort', 'created_at');
         $sortDirection = $request->input('type', 'desc');
+        $exportToExcel = $request->input('exportToExcel', false);
 
         $guest = Guest::select('id', 'name', 'phone_number')
+            ->with(['attendance_guest' => function ($query) use ($year, $start_date, $end_date) {
+                $query->when($year, function ($q) use ($year) {
+                    $q->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
+                });
+                $query->when(($start_date && $end_date), function ($q) use ($start_date, $end_date) {
+                    $q->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59']);
+                });
+            }])
             ->when($year, function ($q) use ($year) {
                 $q->whereHas('attendance_guest', function ($query) use ($year) {
                     $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
@@ -229,7 +240,7 @@ class AttendanceGuestController extends Controller
             })
             ->when(($start_date && $end_date), function ($q) use ($start_date, $end_date) {
                 $q->whereHas('attendance_guest', function ($query) use ($start_date, $end_date) {
-                    $query->whereBetween('time_check_in', [$start_date, $end_date]);
+                    $query->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59']);
                 });
             })
             ->withCount([
@@ -238,7 +249,7 @@ class AttendanceGuestController extends Controller
                         $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
                     });
                     $query->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
-                        $query->whereBetween('time_check_in', [$start_date, $end_date]);
+                        $query->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59']);
                     });
                 },
             ])
@@ -261,7 +272,7 @@ class AttendanceGuestController extends Controller
                             $query->whereRaw("EXTRACT(YEAR FROM attendance_guests.time_check_in) = ?", [$year]);
                         })
                         ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
-                            $query->whereBetween('attendance_guests.time_check_in', [$start_date, $end_date]);
+                            $query->whereBetween('attendance_guests.time_check_in', [$start_date, $end_date . ' 23:59:59']);
                         }),
                 ])->orderBy('total_duration', 'desc');
             })
@@ -275,7 +286,7 @@ class AttendanceGuestController extends Controller
                             $query->whereRaw("EXTRACT(YEAR FROM attendance_guests.time_check_in) = ?", [$year]);
                         })
                         ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
-                            $query->whereBetween('attendance_guests.time_check_in', [$start_date, $end_date]);
+                            $query->whereBetween('attendance_guests.time_check_in', [$start_date, $end_date . ' 23:59:59']);
                         }),
                 ])->orderBy('total_duration', 'asc');
             })
@@ -293,7 +304,7 @@ class AttendanceGuestController extends Controller
                     $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
                 })
                 ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
-                    $query->whereBetween('time_check_in', [$start_date, $end_date]);
+                    $query->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59']);
                 })
                 ->latest()
                 ->first();
@@ -309,7 +320,7 @@ class AttendanceGuestController extends Controller
                     $query->whereRaw("EXTRACT(YEAR FROM time_check_in) = ?", [$year]);
                 })
                 ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
-                    $query->whereBetween('time_check_in', [$start_date, $end_date]);
+                    $query->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59']);
                 })
                 ->selectRaw(
                     "TO_CHAR(SUM(EXTRACT(EPOCH FROM CAST(duration AS INTERVAL))) * interval '1 second', 'HH24:MI:SS') as total_duration"
@@ -321,9 +332,32 @@ class AttendanceGuestController extends Controller
             return $q;
         });
 
-        return response()->json([
-            'success' => true,
-            'data' => $guest
-        ], 200);
+        if ($exportToExcel) {
+            $excel_collection = collect();
+            $guest->map(function ($item) use ($excel_collection) {
+                if ($item->attendance_guest) {
+                    $item->attendance_guest->map(function ($att) use ($item, $excel_collection) {
+                        $excel_collection->add([
+                            'Nama Tamu' => $item->name,
+                            'Tanggal Kunjungan' => $att->time_check_in,
+                            'Jumlah Tamu' => $att->total_guest,
+                            'Waktu Kunjungan' => $att->duration,
+                            'Institusi' => $att->institution,
+                        ]);
+                    });
+                }
+            });
+
+            if ($excel_collection && $excel_collection->count()) {
+                $data = $excel_collection->toArray();
+            }
+            
+            return Excel::download(new AttendanceGuestReport($data), 'attendance_guest.xlsx');
+        } else {
+            return response()->json([
+                'success' => true,
+                'data' => $guest
+            ], 200);
+        }
     }
 }

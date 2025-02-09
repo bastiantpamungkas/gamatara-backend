@@ -31,6 +31,11 @@ Route::post('/', [FaceScanController::class, 'facescan']);
 
 Route::post('login', [AuthController::class, 'login']); 
 
+Route::prefix('excel')->group(function () {
+    Route::get('attendance', [AttendanceController::class, 'report']);
+    Route::get('attendance_guest', [AttendanceGuestController::class, 'report']);
+});
+
 Route::middleware(['auth:api'])->group(function () {
     Route::get('me', [AuthController::class, 'me']);
     Route::post('logout', [AuthController::class, 'logout']);
@@ -94,6 +99,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('list_per_employee/{user_id}', [AttendanceController::class, 'list_per_employee']);
         Route::get('detail/{id}', [AttendanceController::class, 'detail']);
         Route::get('report', [AttendanceController::class, 'report']);
+        Route::get('report_detail', [AttendanceController::class, 'report_detail']);
     });
     
     Route::prefix('attendance_guest')->group(function () {

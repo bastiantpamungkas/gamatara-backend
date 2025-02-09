@@ -18,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Types\Relations\Car;
 use App\Jobs\JobPostBatik;
+use App\Exports\AttendanceReport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceController extends Controller
 {
@@ -125,8 +127,19 @@ class AttendanceController extends Controller
         $end_date = $request->input('end_date') ?? null;
         $sort = $request->input('sort', 'created_at');
         $sortDirection = $request->input('type', 'desc');
+        $exportToExcel = $request->input('exportToExcel', false);
 
         $user = User::select('id', 'name', 'nip', 'status')
+            ->with(['attendance' => function ($query) use ($month, $start_date, $end_date) {
+                if ($month) {
+                    $yearMonth = Carbon::parse($month);
+                    $query->whereYear('time_check_in', $yearMonth->year)
+                        ->whereMonth('time_check_in', $yearMonth->month);
+                }
+                if ($start_date && $end_date) {
+                    $query->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59' ]);
+                }
+            }])
             ->withCount([
                 'attendance' => function ($q) use ($month, $start_date, $end_date) {
                     if ($month) {
@@ -135,7 +148,7 @@ class AttendanceController extends Controller
                             ->whereMonth('time_check_in', $yearMonth->month);
                     }
                     if ($start_date && $end_date) {
-                        $q->whereBetween('time_check_in', [$start_date, $end_date]);
+                        $q->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59' ]);
                     }
                 },
                 'attendance as ontime_attendance' => function ($q) use ($month, $start_date, $end_date) {
@@ -146,7 +159,7 @@ class AttendanceController extends Controller
                             ->whereMonth('time_check_in', $yearMonth->month);
                     }
                     if ($start_date && $end_date) {
-                        $q->whereBetween('time_check_in', [$start_date, $end_date]);
+                        $q->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59']);
                     }
                 },
                 'attendance as late_attendance' => function ($q) use ($month, $start_date, $end_date) {
@@ -157,7 +170,7 @@ class AttendanceController extends Controller
                             ->whereMonth('time_check_in', $yearMonth->month);
                     }
                     if ($start_date && $end_date) {
-                        $q->whereBetween('time_check_in', [$start_date, $end_date]);
+                        $q->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59']);
                     }
                 },
                 'attendance as early_checkout' => function ($q) use ($month, $start_date, $end_date) {
@@ -168,7 +181,7 @@ class AttendanceController extends Controller
                             ->whereMonth('time_check_in', $yearMonth->month);
                     }
                     if ($start_date && $end_date) {
-                        $q->whereBetween('time_check_in', [$start_date, $end_date]);
+                        $q->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59']);
                     }
                 },
             ])
@@ -204,18 +217,98 @@ class AttendanceController extends Controller
                             ->whereMonth('time_check_in', $yearMonth->month);
                     }
                     if ($start_date && $end_date) {
-                        $query->whereBetween('time_check_in', [$start_date, $end_date]);
+                        $query->whereBetween('time_check_in', [$start_date, $end_date . ' 23:59:59']);
                     }
                 });
+            })->paginate($pageSize, ['*'], 'page', $page);
+
+        if ($exportToExcel) {
+            $excel_collection = collect();
+            $user->map(function ($item) use ($excel_collection) {
+                if ($item->attendance) {
+                    $item->attendance->map(function ($att) use ($item, $excel_collection) {
+                        $excel_collection->add([
+                            'Nama' => $item->name,
+                            'NIK' => $item->nip,
+                            'Jam Masuk' => $att->time_check_in,
+                            'Jam Keluar' => $att->time_check_out,
+                        ]);
+                    });
+                }
+            });
+
+            if ($excel_collection && $excel_collection->count()) {
+                $data = $excel_collection->toArray();
+            }
+
+            return Excel::download(new AttendanceReport($data), 'attendance_report.xlsx');
+        } else {
+            return response()->json([
+                'success' => true,
+                'data' => $user
+            ], 200);
+        }
+    }
+
+    public function report_detail(Request $request)
+    {
+        $shift = $request->input('shift') ?? null;
+        $status_checkin = $request->input('status_checkin') ?? null;
+        $status_checkout = $request->input('status_checkout') ?? null;
+        $company = $request->input('company') ?? null;
+        $type_employee_id = $request->input('type_employee_id') ?? null;
+        $start_date = $request->input('start_date') ?? null;
+        $end_date = $request->input('end_date') ? Carbon::parse($request->input('end_date'))->addDay() : null;
+        $keyword = $request->input('keyword') ?? null;
+        $status = $request->input('status') ?? null;
+        $sort = $request->input('sort', 'created_at');
+        $sortDirection = $request->input('type', 'desc');
+
+        $att = Attendance::with(['user.shift', 'user.company', 'user.type', 'shift'])
+        ->whereHas('user', function ($q) use ($keyword, $status) {
+            $q->when($status, function ($query) use ($status) {
+                $query->where('status', $status);
             })
-            ->paginate($pageSize, ['*'], 'page', $page);
+            ->when($keyword, function ($query) use ($keyword) {
+                $query->where('name', 'ilike', '%'.$keyword.'%');
+                $query->orWhere("nip", $keyword);
+            });
+        })
+        ->when($shift, function ($query) use ($shift) {
+            $query->whereHas('user.shift', function ($q) use ($shift) {
+                $q->where('id', $shift);
+            });
+        })
+        ->when($company, function ($query) use ($company) {
+            $query->whereHas('user.company', function ($q) use ($company) {
+                $q->where('id', $company);
+            });
+        })
+        ->when($type_employee_id, function ($query) use ($type_employee_id) {
+            $query->whereHas('user.type', function ($q) use ($type_employee_id) {
+                $q->where('id', $type_employee_id);
+            });
+        })
+        ->when($status_checkin, function ($query) use ($status_checkin) {
+            $query->where('status_check_in', $status_checkin);
+        })
+        ->when($status_checkout, function ($query) use ($status_checkout) {
+            $query->where('status_check_out', $status_checkout);
+        })
+        ->when(($start_date && $end_date), function ($query) use ($start_date, $end_date) {
+            $query->whereBetween('time_check_in', [$start_date, $end_date]);
+        });
 
-
-
+        $att = Helper::pagination($att->orderBy($sort, $sortDirection), $request, [
+            'time_check_in',
+            'time_check_out',
+            'user.name',
+            'user.nip'
+        ]);
 
         return response()->json([
             'success' => true,
-            'data' => $user
+            'data' => $att
         ], 200);
     }
 
