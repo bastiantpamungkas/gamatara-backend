@@ -47,7 +47,8 @@ class JobPersPerson implements ShouldQueue
      */
     public function handle(): void
     {
-        $person = PersPerson::select('pin', 'name', 'photo_path')->get();
+        // $person = PersPerson::select('pin', 'name', 'photo_path')->get();
+        $person = PersPerson::get();
         if ($person) {
             foreach ($person as $row) {
                 $user = User::where('nip', $row->pin)->first();
@@ -58,6 +59,7 @@ class JobPersPerson implements ShouldQueue
                     $user->email = Str::slug($row->name) . $row->pin . '@gmail.com';
                     // $user->password = Hash::make('1235678');
                     // $user->type_employee_id = 1;
+                    $user->department = ($row->department) ? $row->department->name : null;
                     $user->save();
                 } else {
                     User::create(
@@ -68,6 +70,7 @@ class JobPersPerson implements ShouldQueue
                             'email' => Str::slug($row->name) . $row->pin . '@gmail.com',
                             'password' => Hash::make('1235678'),
                             'type_employee_id' => 1,
+                            'department' => ($row->department) ? $row->department->name : null
                         ]
                     );
                 }

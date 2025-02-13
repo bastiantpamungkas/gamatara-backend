@@ -27,6 +27,7 @@ class UserController extends Controller
             $query->where( function ($q_group) use ($keyword) {
                 $q_group->where('name', 'ilike', '%'.$keyword.'%');
                 $q_group->orWhere('email', 'ilike', '%'.$keyword.'%');
+                $q_group->orWhere('department', 'ilike', '%'.$keyword.'%');
                 $q_group->orWhere("nip", $keyword);
             });
         })
