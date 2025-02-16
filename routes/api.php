@@ -100,6 +100,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('detail/{id}', [AttendanceController::class, 'detail']);
         Route::get('report', [AttendanceController::class, 'report']);
         Route::get('report_detail', [AttendanceController::class, 'report_detail']);
+        Route::post('sync', [AttendanceController::class, 'sync']);
     });
     
     Route::prefix('attendance_guest')->group(function () {

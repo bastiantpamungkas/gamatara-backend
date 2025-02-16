@@ -12,14 +12,19 @@ use App\Models\MachineSetting;
 use App\Models\Setting;
 use App\Models\Shift;
 use App\Models\User;
+use App\Models\AccTransaction;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Types\Relations\Car;
 use App\Jobs\JobPostBatik;
+use App\Jobs\JobPostAtt;
+use App\Jobs\JobResetAttendance;
 use App\Exports\AttendanceReport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AttendanceController extends Controller
 {
@@ -464,7 +469,7 @@ class AttendanceController extends Controller
             };
 
             if (!$attender) {
-                $attender = $this->userCreate($request);
+                $attender = $this->userCreate_v1($request);
             }
 
             if ($attender->shift_id && $attender->shift_id2) {
@@ -581,15 +586,19 @@ class AttendanceController extends Controller
                     }
                 }
 
-                $this->publishToAbly('gate', [
-                    'name'         => $attender->name,
-                    'greeting'     => $greeting,
-                    'accessStatus' => $access_status,
-                    'role'         => $attender->getRoleNames(),
-                    'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
-                    'status'       => Helper::statusAtt($status_in ?? 2),
-                    'photo_path'   => env('PROFILE_PHOTO_LARAVEL_URL').$request->photo_path,
-                ]);
+                if ($request->is_reposting) {
+                    // do nothing
+                } else {
+                    $this->publishToAbly('gate', [
+                        'name'         => $attender->name,
+                        'greeting'     => $greeting,
+                        'accessStatus' => $access_status,
+                        'role'         => $attender->getRoleNames(),
+                        'entryTime'    => $entry_time_status . Carbon::parse($check_time)->format('Y-m-d H:i:s'),
+                        'status'       => Helper::statusAtt($status_in ?? 2),
+                        'photo_path'   => env('PROFILE_PHOTO_LARAVEL_URL').$request->photo_path,
+                    ]);
+                }
             } catch (Exception $e) {
                 return response()->json([
                     'success' => false,
@@ -630,6 +639,27 @@ class AttendanceController extends Controller
                 'type_employee_id' => $request->dept_code ?? 0,
             ]);
 
+            return $attender;
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    private function userCreate_v1($request)
+    {
+        try {
+            $attender = User::create([
+                'name'             => $request->name,
+                'email'            => Str::slug($request->name) . $request->pin . '@gmail.com',
+                'pin'              => $request->pin,
+                'nip'              => $request->pin,
+                'type_employee_id' => 1,    // default 1 to Gamatara
+                'password'         => Hash::make('1235678'),    
+                'department'       => ($request->dept_name) ? $request->dept_name : null
+            ]);
             return $attender;
         } catch (Exception $e) {
             return response()->json([
@@ -731,5 +761,114 @@ class AttendanceController extends Controller
                 'message' => $e->getMessage()
             ], 422);
         }
+    }
+
+    public function sync(Request $request)
+    {
+        // event_time, pin, dev_sn, name, dept_code, photo_path
+        $valid = Helper::validator($request->all(), [
+            'date' => 'required',
+            'user_id' => 'required',
+        ]);
+
+        if ($valid === true) {
+            try {
+                $user = User::find($request->user_id);
+                if ($user && $user->pin) {
+                    $date = $request->date ?? Carbon::now()->format('Y-m-d'); // Default to current date if not provided
+                    $pin = $user->pin ?? null; // Get the pin option
+
+                    $currentDate = Carbon::now()->format('Y-m-d');
+
+                    AttLog::whereDate('time_check_in', '>=', $date)
+                        ->whereHas('user', function($query) use ($pin) {
+                            $query->when($pin, function ($q) use ($pin) {
+                                $q->where('pin', $pin);
+                            });
+                        })
+                        ->delete();
+                    
+                    AttLog::whereDate('time_check_out', '>=', $date)
+                        ->whereHas('user', function($query) use ($pin) {
+                            $query->when($pin, function ($q) use ($pin) {
+                                $q->where('pin', $pin);
+                            });
+                        })
+                        ->delete();
+
+                    Attendance::whereDate('time_check_in', '>=', $date)
+                        ->whereHas('user', function($query) use ($pin) {
+                            $query->when($pin, function ($q) use ($pin) {
+                                $q->where('pin', $pin);
+                            });
+                        })
+                        ->delete();
+
+                    // Attendance::whereDate('time_check_out', '>=', $date)
+                    //     ->whereHas('user', function($query) use ($pin) {
+                    //         $query->when($pin, function ($q) use ($pin) {
+                    //             $q->where('pin', $pin);
+                    //         });
+                    //     })
+                    //     ->delete();
+
+                    while (Carbon::parse($date)->lte(Carbon::parse($currentDate))) {
+                        $accTrans = AccTransaction::whereDate('event_time', $date)
+                            ->whereHas('pers_person', function($query) use ($pin) {
+                                $query->when($pin, function ($q) use ($pin) {
+                                    $q->where('pin', $pin);
+                                });
+                            })
+                            ->orderBy('event_time', 'asc')
+                            ->get();
+                        if ($accTrans && $accTrans->count()) {
+                            foreach ($accTrans as $row) {
+                                $payload = [
+                                    'id' => $row->id,
+                                    'pin' => $row->pin,
+                                    'event_time' => $row->event_time,
+                                    'dev_sn' => $row->dev_sn,
+                                    'dept_code' => $row->dept_code,
+                                    'dept_name' => $row->dept_name,
+                                    'is_reposting' => true,
+                                ];
+                                if ($row->pers_person) {
+                                    $payload['name'] = $row->pers_person->name;
+                                    $payload['photo_path'] = $row->pers_person->photo_path;
+                                }
+                                JobPostAtt::dispatch($payload);
+                            }
+
+                            if ($date == $currentDate) {
+                                // do nothing
+                            } else {
+                                $payload = [
+                                    'date' => $date,
+                                    'pin' => $pin,
+                                ];
+                                JobResetAttendance::dispatch($payload);
+                            }
+                        }
+                        $date = Carbon::parse($date)->addDay()->format('Y-m-d');
+                    }
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Success Sync Attendance',
+                ],200);
+
+            } catch (Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ],422);
+            }
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => "Failed Sync Attendance",
+        ], 422);
     }
 }
