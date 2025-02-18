@@ -17,6 +17,7 @@ class UserController extends Controller
         $type_employee = $request->input('type_employee') ?? null;
         $shift_employee = $request->input('shift_employee') ?? null;
         $company = $request->input('company') ?? null;
+        $department = $request->input('department') ?? null;
         $status = $request->input('status') ?? null;
         $keyword = $request->input('keyword') ?? null;
         $sort = $request->input('sort', 'created_at');
@@ -27,7 +28,6 @@ class UserController extends Controller
             $query->where( function ($q_group) use ($keyword) {
                 $q_group->where('name', 'ilike', '%'.$keyword.'%');
                 $q_group->orWhere('email', 'ilike', '%'.$keyword.'%');
-                $q_group->orWhere('department', 'ilike', '%'.$keyword.'%');
                 $q_group->orWhere("nip", $keyword);
             });
         })
@@ -45,6 +45,9 @@ class UserController extends Controller
         })
         ->when($company, function ($query) use ($company) {
             $query->where('company_id', $company);
+        })
+        ->when($department, function ($query) use ($department) {
+            $query->where('department', $department);
         });
 
         $user = Helper::pagination($query, $request, ['name', 'email', 'nip']);
@@ -515,6 +518,17 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'data' => $user
+        ], 200);
+    }
+
+    public function department_list(Request $request)
+    {
+        $query = User::select('department')->distinct()->orderBy('department', 'asc');
+        $departments = Helper::pagination($query, $request, ['department']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $departments
         ], 200);
     }
 }

@@ -78,6 +78,10 @@ Route::middleware(['auth:api'])->group(function () {
         Route::delete('delete/{id}', [UserController::class, 'delete']);
     });
 
+    Route::prefix('department')->group(function () {
+        Route::get('list', [UserController::class, 'department_list']);
+    });
+
     Route::prefix('shift')->group(function () {
         Route::get('list', [ShiftController::class, 'list']);
         Route::post('store', [ShiftController::class, 'store']);
