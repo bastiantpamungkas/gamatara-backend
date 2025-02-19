@@ -511,7 +511,8 @@ class AttendanceController extends Controller
                                 $att_out->time_check_out,
                                 $check_time,
                                 $st_inorout->status,
-                                $shift
+                                $shift,
+                                $attender->hasRole(['Tamu', 'tamu'])
                             );
                         }
                     } else {
@@ -540,7 +541,8 @@ class AttendanceController extends Controller
                             $check_time,
                             $check_time,
                             $st_inorout->status,
-                            $shift
+                            $shift,
+                            $attender->hasRole(['Tamu', 'tamu'])
                         );
                     }
                 } else {
@@ -581,7 +583,8 @@ class AttendanceController extends Controller
                             $att_in->time_check_out,
                             $check_time,
                             $st_inorout->status,
-                            ($att_in->shift) ? $att_in->shift : null
+                            ($att_in->shift) ? $att_in->shift : null,
+                            $attender->hasRole(['Tamu', 'tamu'])
                         );
                     }
                 }
@@ -700,7 +703,7 @@ class AttendanceController extends Controller
         }
     }
 
-    private function attLog_v2($attenderId, $time_start, $check_time, $status, $shift = null)
+    private function attLog_v2($attenderId, $time_start, $check_time, $status, $shift = null, $isTamu = false)
     {
         $timeStartCheck = Carbon::parse($time_start);
         $diffInSeconds = $timeStartCheck->diffInSeconds(Carbon::parse($check_time));
@@ -710,22 +713,29 @@ class AttendanceController extends Controller
         $diff = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
 
         if ($status == "IN") {
-            if ($shift && $shift->is_overnight) {
-                $attLog = AttLog::where('user_id', $attenderId)->whereNull('time_check_in')->whereDate('time_check_out', Carbon::parse($check_time)->subDay()->format('Y-m-d'))->latest()->first();
-            } else {
-                $attLog = AttLog::where('user_id', $attenderId)->whereDate('time_check_out', $check_time)->latest()->first();
-            }
-            
-            if ($attLog) {
-                $attLog->update([
-                    'time_check_in'  => $check_time,
-                    'total_time' => $diff
-                ]);
-            } else {
+            if ($isTamu) {
                 AttLog::create([
                     'user_id'         => $attenderId,
                     'time_check_in'  => $check_time
                 ]);
+            } else {
+                if ($shift && $shift->is_overnight) {
+                    $attLog = AttLog::where('user_id', $attenderId)->whereNull('time_check_in')->whereDate('time_check_out', Carbon::parse($check_time)->subDay()->format('Y-m-d'))->latest()->first();
+                } else {
+                    $attLog = AttLog::where('user_id', $attenderId)->whereDate('time_check_out', $check_time)->latest()->first();
+                }
+                
+                if ($attLog) {
+                    $attLog->update([
+                        'time_check_in'  => $check_time,
+                        'total_time' => $diff
+                    ]);
+                } else {
+                    AttLog::create([
+                        'user_id'         => $attenderId,
+                        'time_check_in'  => $check_time
+                    ]);
+                }
             }
         } else {
             AttLog::create([
