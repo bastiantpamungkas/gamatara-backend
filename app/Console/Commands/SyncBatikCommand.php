@@ -31,7 +31,7 @@ class SyncBatikCommand extends Command
     public function handle()
     {
         // Fetch all users from the User model
-        $users = User::select('id','name','email','pin','shift_id','type_employee_id','company_id','status','shift_id2','department')->get();
+        $users = User::select('id', 'name', 'email', 'pin', 'shift_id', 'type_employee_id', 'company_id', 'status', 'shift_id2', 'department')->get();
 
         // Prepare data for upsert
         if ($users && $users->count()) {
@@ -40,15 +40,15 @@ class SyncBatikCommand extends Command
             UserBatik::upsert($userBatikData, ['id'], ['name', 'email', 'pin', 'shift_id', 'type_employee_id', 'company_id', 'status', 'shift_id2', 'department']);
         }
 
-        // Get yesterday's date
-        $yesterday = Carbon::yesterday()->format('Y-m-d');
+        // Get the date a month ago
+        $startDate = Carbon::now()->subMonth(2)->format('Y-m-d');
 
-        // Select attendance records where the date is yesterday
-        $attendance = Attendance::with('user')->whereDate('time_check_in', '>=', $yesterday)->get();
+        // Select attendance records where the date is aMonthAgo
+        $attendance = Attendance::with('user')->whereDate('time_check_in', '>=', $startDate)->get();
 
         if ($attendance && $attendance->count()) {
-            AttendanceBatik::whereDate('time_check_in', '>=', $yesterday)->delete();
-            $attendanceBatik = $attendance->map(function($item) {
+            AttendanceBatik::whereDate('time_check_in', '>=', $startDate)->delete();
+            $attendanceBatik = $attendance->map(function ($item) {
                 return [
                     'id' => $item->id,
                     'user_id' => $item->user_id,
@@ -63,8 +63,13 @@ class SyncBatikCommand extends Command
                 ];
             })->toArray();
 
-            AttendanceBatik::upsert($attendanceBatik, ['id'], ['user_id', 'name', 'pin', 'time_check_in', 'time_check_out', 'created_at', 'updated_at', 'status', 'shift_id']);
-        }    
-        $this->info("Sync schedule from attendance to Batik at " . $yesterday);
+            // Batch the upsert operations
+            $batchSize = 1000; // Adjust the batch size as needed
+            foreach (array_chunk($attendanceBatik, $batchSize) as $batch) {
+                AttendanceBatik::upsert($batch, ['id'], ['user_id', 'name', 'pin', 'time_check_in', 'time_check_out', 'created_at', 'updated_at', 'status', 'shift_id']);
+            }
+            
+        }
+        $this->info("Sync schedule from attendance to Batik at " . $startDate);
     }
 }
